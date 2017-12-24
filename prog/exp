@@ -1,0 +1,10 @@
+(
+[
+"exp",
+(["x","n"],
+  if (prim equal [var "n", const(ival 0)] )
+   (const(ival 1))
+   (prim mul [var "x",apply "exp" [var "x", prim sub [var "n", const(ival 1)]]]))
+],
+  apply "exp" [const (ival 2),const (ival 10)]
+)

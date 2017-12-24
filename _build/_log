@@ -1,0 +1,34 @@
+### Starting build.
+# Target: Main.ml.depends, tags: { extension:ml, file:Main.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules Main.ml > Main.ml.depends # cached
+# Target: Interpreter.ml.depends, tags: { extension:ml, file:Interpreter.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules Interpreter.ml > Interpreter.ml.depends # cached
+# Target: SourceAst.ml.depends, tags: { extension:ml, file:SourceAst.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules SourceAst.ml > SourceAst.ml.depends # cached
+# Target: SourceAst.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:SourceAst.cmo, file:SourceAst.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -w -40 -o SourceAst.cmo SourceAst.ml # cached
+# Target: Interpreter.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Interpreter.cmo, file:Interpreter.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -w -40 -o Interpreter.cmo Interpreter.ml # cached
+# Target: Lexer.mll, tags: { extension:mll, file:Lexer.mll, lexer, ocaml, ocamllex, quiet }
+/home/Dexter/.opam/4.02.3/bin/ocamllex.opt -q Lexer.mll # cached
+# Target: Lexer.ml.depends, tags: { extension:ml, file:Lexer.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules Lexer.ml > Lexer.ml.depends # cached
+# Target: Parser.mly.depends, tags: { extension:mly, file:Parser.mly, infer, menhir_ocamldep, ocaml, ocamldep, quiet }
+menhir --raw-depend --ocamldep 'ocamlfind ocamldep -modules' Parser.mly > Parser.mly.depends # cached
+# Target: Parser.mly, tags: { byte, compile, extension:ml, extension:mly, file:Parser.ml, file:Parser.mly, infer, menhir, ocaml, parser, quiet }
+menhir --ocamlc 'ocamlfind ocamlc -w -40' --infer Parser.mly # cached
+# Target: Parser.mli.depends, tags: { extension:mli, file:Parser.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules Parser.mli > Parser.mli.depends # cached
+# Target: Parser.cmi, tags: { byte, compile, extension:mli, file:Parser.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -w -40 -o Parser.cmi Parser.mli # cached
+# Target: Lexer.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Lexer.cmo, file:Lexer.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -w -40 -o Lexer.cmo Lexer.ml # cached
+# Target: Main.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Main.cmo, file:Main.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -w -40 -o Main.cmo Main.ml # cached
+# Target: Parser.ml.depends, tags: { extension:ml, file:Parser.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules Parser.ml > Parser.ml.depends # cached
+# Target: Parser.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Parser.cmo, file:Parser.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -w -40 -o Parser.cmo Parser.ml
+# Target: Main.byte, tags: { byte, dont_link_with, extension:byte, file:Main.byte, link, ocaml, program, quiet }
+ocamlfind ocamlc -linkpkg SourceAst.cmo Interpreter.cmo Parser.cmo Lexer.cmo Main.cmo -o Main.byte
+# Compilation successful.
