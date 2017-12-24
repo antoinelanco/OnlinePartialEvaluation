@@ -1,0 +1,8 @@
+(
+[
+"exp",
+(["x","n"],
+prim mul [var "x",var "n"])
+],
+  apply "exp" [const (ival 10),var "x"]
+)
