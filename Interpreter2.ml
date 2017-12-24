@@ -28,20 +28,19 @@ and eval' fdefs main env =
 
   | If(e0,e1,e2) ->
     let r0 = eval' fdefs e0 env in
-    let r1 = eval' fdefs e1 env in
-    let r2 = eval' fdefs e2 env in
     if isVal r0
     then
-      (if val_to_bool r0
-       then r1
-       else r2)
+      (if (val_to_bool r0)
+       then (eval' fdefs e1 env)
+       else (eval' fdefs e2 env))
     else
-      (If(r0,r1,r2))
+      (If(r0,(eval' fdefs e1 env),(eval' fdefs e2 env)))
 
   | Apply(s,es) ->
     let (ss,body) = Func_Tbl.find s fdefs in
     let env' = List.fold_left2
-        (fun acc str ee -> Env.add str (eval' fdefs ee env) acc)
+        (fun acc str ee ->
+          Env.add str (eval' fdefs ee env) acc)
         Env.empty ss es in
 
     eval' fdefs body env'
