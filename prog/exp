@@ -6,5 +6,5 @@
    (const(ival 1))
    (prim mul [var "x",apply "exp" [var "x", prim sub [var "n", const(ival 1)]]]))
 ],
-  apply "exp" [const (ival 2),const (ival 10)]
+  apply "exp" [const (ival 10),const (ival 2)]
 )

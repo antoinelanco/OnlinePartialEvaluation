@@ -14,17 +14,17 @@ and eval' fdefs main env =
   | Var(s)     -> Env.find s env
   | Prim(o,es) ->
     let rs = List.fold_left
-        (fun acc e -> acc @ [(eval' fdefs e env)] ) [] es in
+    (fun acc e -> acc @ [(eval' fdefs e env)] ) [] es in
     prim o rs
   | If(e0,e1,e2) -> if val_to_bool (eval' fdefs e0 env)
-    then eval' fdefs e1 env
-    else eval' fdefs e2 env
+                    then eval' fdefs e1 env
+                    else eval' fdefs e2 env
 
   | Apply(s,es) ->
     let (ss,body) = Func_Tbl.find s fdefs in
     let env' = List.fold_left2
-        (fun acc str ee -> Env.add str (eval' fdefs ee env) acc)
-        Env.empty ss es in
+    (fun acc str ee -> Env.add str (eval' fdefs ee env) acc)
+    Env.empty ss es in
 
     eval' fdefs body env'
 
@@ -42,5 +42,5 @@ and prim o rs =
   | _ -> failwith "Err0r match bin0p"
 
 and val_to_bool = function
-  | BVal b -> b
-  | IVal _ -> failwith "Not a boolean value"
+| BVal b -> b
+| IVal _ -> failwith "Not a boolean value"

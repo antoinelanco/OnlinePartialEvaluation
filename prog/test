@@ -1,1 +1,1 @@
-([],  apply "exp" [const (ival 1),const (ival 2)] )
+([],  prim mul [const (ival 1),const (ival 2)] )

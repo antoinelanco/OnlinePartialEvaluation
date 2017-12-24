@@ -26,6 +26,23 @@ and op =
 
 open Printf
 
-let rec print_val = function
-  | IVal i -> Printf.printf "%d\n" i
-  | BVal b -> Printf.printf "%b\n" b
+let rec print_expr = function
+| Const(v)     -> sprintf "Const(%s)" (print_val v)
+| Var(s)       -> sprintf "Var(%s)" s
+| Prim(o,es)   -> sprintf "Prim(%s%s)" (print_op o) (print_list_expr es)
+| If(e0,e1,e2) -> sprintf "If(%s)(%s)(%s)" (print_expr e0) (print_expr e1) (print_expr e2)
+| Apply(s,es)  -> sprintf "Apply(%s%s)" s (print_list_expr es)
+
+and print_val = function
+| IVal i -> sprintf "IVal(%d)" i
+| BVal b -> sprintf "BVal(%b)" b
+
+and print_op = function
+| Add -> "Add"
+| Mult -> "Mul"
+| Sub -> "Sub"
+| Eq -> "Eq"
+
+
+and print_list_expr es =
+List.fold_left(fun acc i -> acc^","^(print_expr i)) "" es
