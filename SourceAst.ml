@@ -27,5 +27,5 @@ and op =
 open Printf
 
 let rec print_val = function
-| IVal i -> Printf.printf "%d\n" i
-| BVal b -> Printf.printf "%b\n" b
+  | IVal i -> Printf.printf "%d\n" i
+  | BVal b -> Printf.printf "%b\n" b

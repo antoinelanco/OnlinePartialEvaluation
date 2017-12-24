@@ -1,4 +1,4 @@
-for entry in *.ml *.mli
+for entry in *.ml
 do
   ocp-indent "$entry" > tmp
   mv tmp "$entry"
