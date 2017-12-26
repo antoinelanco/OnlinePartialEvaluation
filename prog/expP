@@ -2,8 +2,8 @@
 [
 "exp",
 (["x","n"],
-  if (prim equal [var "n", const(ival 0)] )
-   (const(ival 1))
+  if (prim equal [var "n", const(ival 1)] )
+   (var "x")
    (prim mul [var "x",apply "exp" [var "x", prim sub [var "n", const(ival 1)]]]))
 ],
   apply "exp" [var "x",const (ival 3)]
