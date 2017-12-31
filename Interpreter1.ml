@@ -3,10 +3,10 @@ open SourceAst
 module Env = Map.Make(String)
 type env = vall Env.t
 
-let rec eval p =
+let rec eval p = (* Prog -> Val *)
   let (fdefs,main) = p in
   let res = eval' fdefs main Env.empty in
-  print_val res
+  Printf.printf "%s\n" (print_val res)
 
 and eval' fdefs main env =
   match main with

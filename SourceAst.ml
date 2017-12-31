@@ -26,7 +26,14 @@ and op =
 
 open Printf
 
-let rec print_expr = function
+let rec print_prog p =
+  let (fdesfs,main) = p in
+  sprintf "%s\n%s" (print_fdef fdesfs) (print_expr main)
+
+and print_fdef =
+""
+in
+and print_expr = function
 | Const(v)     -> sprintf "Const(%s)" (print_val v)
 | Var(s)       -> sprintf "Var(%s)" s
 | Prim(o,es)   -> sprintf "Prim(%s%s)" (print_op o) (print_list_expr es)
@@ -42,7 +49,6 @@ and print_op = function
 | Mult -> "Mul"
 | Sub -> "Sub"
 | Eq -> "Eq"
-
 
 and print_list_expr es =
 List.fold_left(fun acc i -> acc^","^(print_expr i)) "" es

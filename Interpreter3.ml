@@ -3,12 +3,12 @@ open SourceAst
 module Env = Map.Make(String)
 type env = expr Env.t
 
-let rec eval p = (* Prog -> Expr *)
+let rec eval p = (* Prog -> Prog *)
   let (fdefs,main) = p in
-  let res = eval' fdefs main Env.empty in
-  Printf.printf "%s\n" (print_expr res)
+  let prog' = eval' fdefs main Env.empty [] in
+  Printf.printf "%s\n" (print_prog prog')
 
-and eval' fdefs main env =
+and eval' fdefs main env monad =
   match main with
   | Const(v)   -> Const(v)
   | Var(s)     ->
