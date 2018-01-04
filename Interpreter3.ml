@@ -72,16 +72,15 @@ and eval' fdefs main env monad =
     else
     begin
       let s' = s^(env_string sas) in
-
       let new_monad =
       match (Func_Tbl.find_opt s' rs_fd) with
       | Some _ -> rs_fd
       | None ->
-        let (e'_fd,e'_ma) = eval' fdefs body sas rs_fd in
+        let n_m = Func_Tbl.add s' ([],Const(IVal(0))) rs_fd in
+        let (e'_fd,e'_ma) = eval' fdefs body sas n_m in
         let new_das = Env.fold (fun s r acc -> acc@[s] ) das [] in
         Func_Tbl.add s' (new_das,e'_ma) e'_fd
       in
-
 
       let param = Env.fold (fun i e acc -> acc@[e]) das [] in
       (new_monad,Apply(s',param))
@@ -96,7 +95,6 @@ Env.fold(fun i e acc -> Printf.sprintf "%s_%s:%s" acc i (print_expr e)) env ""
 in
 
 Printf.sprintf "_%s" (string_of_int (Hashtbl.hash a))
-
 
 and prim o rs =
   if List.length rs <> 2 then failwith "Bin0p need 0nly 2 arg";
