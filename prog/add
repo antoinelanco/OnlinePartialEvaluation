@@ -1,0 +1,8 @@
+(
+[
+"ad",
+(["x","n"],
+   prim add [var "x",var "n"])
+],
+  apply "ad" [const (ival 10),const (ival 2)]
+)
