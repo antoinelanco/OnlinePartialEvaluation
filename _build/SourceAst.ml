@@ -32,14 +32,21 @@ let rec print_prog p =
 
 and print_fdef fd = Func_Tbl.fold (fun key el acc ->
   let (arg_list,exp) = el in
-  let args_lists = List.fold_left(fun ac i -> sprintf "%s,%s" ac i) "" arg_list in
+  let args_lists =
+    let tmp = List.fold_left(fun ac i -> sprintf "%s,%s" ac i) "" arg_list in
+    let taille = String.length tmp in
+    if taille != 0
+    then String.sub tmp 1 (taille-1)
+    else tmp
+  in
+
   sprintf "%s\n%s,[%s]\n%s" acc key args_lists (print_expr exp) ) fd ""
 
 and print_expr = function
 | Const(v)     -> sprintf "Const(%s)" (print_val v)
 | Var(s)       -> sprintf "Var(%s)" s
 | Prim(o,es)   -> sprintf "Prim(%s[%s])" (print_op o) (print_list_expr es)
-| If(e0,e1,e2) -> sprintf "If(%s)(%s)(%s)" (print_expr e0) (print_expr e1) (print_expr e2)
+| If(e0,e1,e2) -> sprintf "If(%s)\n(%s)\n(%s)" (print_expr e0) (print_expr e1) (print_expr e2)
 | Apply(s,es)  -> sprintf "Apply(%s[%s])" s (print_list_expr es)
 
 and print_val = function
@@ -53,4 +60,8 @@ and print_op = function
 | Eq -> "Eq"
 
 and print_list_expr es =
-List.fold_left(fun acc i -> acc^","^(print_expr i)) "" es
+let tmp = List.fold_left(fun acc i -> acc^","^(print_expr i)) "" es in
+let taille = String.length tmp in
+if taille != 0
+then String.sub tmp 1 (taille-1)
+else tmp
