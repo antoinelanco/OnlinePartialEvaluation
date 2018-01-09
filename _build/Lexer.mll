@@ -17,6 +17,16 @@
         "const",    CONST;
         "ival",     IVAL;
         "bval",     BVAL;
+        "cval",     CVAL;
+        "tval",     TVAL;
+        "exists",   EXISTS;
+        "find",     FIND;
+        "pval",     PVAL;
+        "fst",      FST;
+        "snd",      SND;
+        "tl",       TL;
+        "hd",       HD;
+        "length",   LENGTH;
         "add",      ADD;
         "mul",      MULT;
         "sub",      SUB;
@@ -52,6 +62,8 @@ rule token = parse
       { EB }
   | ","
       { COMMA }
+  | ";"
+      { SEMI }
   | eof
       { EOF }
   | _

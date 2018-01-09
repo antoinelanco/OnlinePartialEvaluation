@@ -6,16 +6,19 @@
 
 %token <string> IDENT
 %token BEGIN END
-%token COMMA
+%token COMMA SEMI
 %token <int> LITINT
 %token IF
 %token TRUE FALSE
 %token ADD MULT SUB EQ
 %token PRIM VAR CONST APPLAY
-%token IVAL BVAL
+%token TL HD LENGTH
+%token IVAL BVAL CVAL TVAL PVAL
 %token BB EB
 %token DCOTE
 %token EOF
+%token FST SND
+%token EXISTS FIND
 
 %start prog
 %type <SourceAst.prog> prog
@@ -44,9 +47,12 @@ fdef:
  {(fname, (para, e))}
 
 vall:
-| IVAL; i=LITINT { IVal(i) }
-| BVAL; TRUE { BVal(true) }
-| BVAL; FALSE { BVal(false) }
+| IVAL; i=LITINT                            { IVal(i) }
+| BVAL; TRUE                                { BVal(true) }
+| BVAL; FALSE                               { BVal(false) }
+| CVAL; c=str                               { CVal(c) }
+| TVAL; BB; t=separated_list(SEMI,vall); EB { TVal(t) }
+| PVAL; BEGIN; e1=vall; COMMA; e2=vall; END { PVal(e1,e2) }
 
 expr:
 | CONST; BEGIN; v=vall; END { Const(v) }
@@ -54,6 +60,13 @@ expr:
 | APPLAY; id=str BB; es=separated_list(COMMA, expr); EB { Apply(id,es) }
 | PRIM; bin=op; BB; es=separated_list(COMMA, expr); EB { Prim(bin,es) }
 | IF; BEGIN; e1=expr; END; BEGIN; e2=expr; END; BEGIN; e3=expr; END { If(e1,e2,e3) }
+| TL; BEGIN; e=expr; END { TL(e) }
+| HD; BEGIN; e=expr; END { HD(e) }
+| LENGTH; BEGIN; e=expr; END { Length(e) }
+| FST; BEGIN; e=expr; END { Fst(e) }
+| SND; BEGIN; e=expr; END { Snd(e) }
+| EXISTS; BEGIN; e1=expr; COMMA; e2=expr; END { Exists(e1,e2) }
+| FIND; BEGIN; e1=expr; COMMA; e2=expr; END { Find(e1,e2) }
 
 op:
 | MULT { Mult }

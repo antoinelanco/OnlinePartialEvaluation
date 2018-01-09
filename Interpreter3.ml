@@ -88,6 +88,77 @@ and eval' fdefs main env monad =
     end
 
 
+  | TL(e) ->
+    let (fd0,ma0) = eval' fdefs e env monad in
+    if isVal ma0
+    then (match ma0 with
+    | Const(TVal n) -> (fd0,Const(TVal (List.tl n)))
+    | _ -> failwith "tl 0nly with TVal")
+
+    else (fd0,TL(ma0))
+
+  | HD(e) ->
+    let (fd0,ma0) = eval' fdefs e env monad in
+    if isVal ma0
+    then (match ma0 with
+    | Const(TVal n) -> (fd0,Const(List.hd n))
+    | _ -> failwith "hd 0nly with TVal")
+
+    else (fd0,HD(ma0))
+
+  | Length(e) ->
+    let (fd0,ma0) = eval' fdefs e env monad in
+    if isVal ma0
+    then (match ma0 with
+    | Const(TVal n) -> (fd0,Const(IVal (List.length n)))
+    | _ -> failwith "Length 0nly with TVal")
+
+    else (fd0,HD(ma0))
+
+
+  | Fst(e) ->
+    let (fd0,ma0) = eval' fdefs e env monad in
+    if isVal ma0
+    then (match ma0 with
+    | Const(PVal(n1,n2)) -> (fd0,Const(n1))
+    | _ -> failwith "fst 0nly with PVal")
+
+    else (fd0,Fst(ma0))
+
+  | Snd(e) ->
+    let (fd0,ma0) = eval' fdefs e env monad in
+    if isVal ma0
+    then (match ma0 with
+    | Const(PVal(n1,n2)) -> (fd0,Const(n2))
+    | _ -> failwith "snd 0nly with PVal")
+
+    else (fd0,Snd(ma0))
+
+  | Exists(e1,e2) ->
+    let (fd1,ma1) = eval' fdefs e1 env monad in
+    let (fd2,ma2) = eval' fdefs e2 env fd1 in
+    (match isVal ma1, isVal ma2 with
+    | true,true ->
+      (match ma2 with
+        | Const(TVal n) ->
+          let b = List.exists (fun i -> if (gFirst i) = (gVal ma1) then true else false) n in
+                          (fd2,Const(BVal b))
+        | _ -> failwith "arg 2 0f exists need t0 be a TVal")
+    | _,_ -> (fd2,Exists(ma1,ma2)))
+
+  | Find(e1,e2) ->
+    let (fd1,ma1) = eval' fdefs e1 env monad in
+    let (fd2,ma2) = eval' fdefs e2 env fd1 in
+
+    if isVal ma1 && isVal ma2
+    then (match ma2 with
+    | Const(TVal n) -> let b = List.find (fun i -> if (gFirst i) = (gVal ma1) then true else false) n in
+                      (fd2,Const(b))
+    | _ -> failwith "arg 2 0f find need t0 be a TVal")
+
+    else (fd2,Find(ma1,ma2))
+
+
 and env_string env =
 
 let a =
@@ -102,10 +173,12 @@ and prim o rs =
   let el2 = List.hd (List.tl rs) in
   match o,el1,el2 with
   | Add,IVal(e1),IVal(e2)  -> IVal(e1+e2)
+  | Add,TVal(e1),TVal(e2)  -> TVal(e1@e2)
   | Mult,IVal(e1),IVal(e2) -> IVal(e1*e2)
   | Sub,IVal(e1),IVal(e2)  -> IVal(e1-e2)
   | Eq,IVal(e1),IVal(e2)   -> BVal (e1 == e2)
   | Eq,BVal(e1),BVal(e2)   -> BVal (e1 == e2)
+  | Eq,TVal(e1),TVal(e2)   -> BVal (e1 = e2)
   | _ -> failwith "Err0r match bin0p"
 
 and merge_vars k v1 v2 =
@@ -125,9 +198,18 @@ and allIsVal = List.fold_left
 
 and getVal = List.map
     (fun i -> match i with
-       | Const(n) -> n
+       | Const n -> n
        | _ -> failwith "C0nst 0nly")
 
 and isVal = function
   | Const _ -> true
   | _ -> false
+
+and gVal = function
+  | Const n -> n
+  | _ -> failwith "N0t Const"
+
+and gFirst = function
+  | PVal (n1,n2) -> gFirst n1
+  | TVal n -> failwith "gFirst TVal"
+  | n -> n
