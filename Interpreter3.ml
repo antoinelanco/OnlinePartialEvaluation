@@ -8,14 +8,14 @@ let rec eval p = (* Prog -> Prog *)
   let prog' = eval' fdefs main Env.empty Func_Tbl.empty in
   Printf.printf "%s\n" (print_prog prog')
 
-and eval' fdefs main env monad =
+and eval' fdefs main env state =
   match main with
-  | Const(v)   -> (monad,Const(v))
+  | Const(v)   -> (state,Const(v))
   | Var(s)     ->
     let v = Env.find_opt s env in
     (match v with
-     | Some n -> (monad,n)
-     | None -> (monad,Var(s)))
+     | Some n -> (state,n)
+     | None -> (state,Var(s)))
 
   | Prim(o,es) ->
     let rs = List.fold_left
@@ -23,7 +23,7 @@ and eval' fdefs main env monad =
           let (acc_fd,acc_ma) = acc in
           let (fd,ma) = eval' fdefs e env acc_fd in
           (Func_Tbl.merge merge_vars fd acc_fd,
-            acc_ma@[ma]) ) (monad,[]) es
+            acc_ma@[ma]) ) (state,[]) es
     in
 
     let (fd,ma) = rs in
@@ -33,7 +33,7 @@ and eval' fdefs main env monad =
 
 
   | If(e0,e1,e2) ->
-    let (fd0,ma0) = eval' fdefs e0 env monad in
+    let (fd0,ma0) = eval' fdefs e0 env state in
     if isVal ma0
     then
       (if (val_to_bool ma0)
@@ -53,7 +53,7 @@ and eval' fdefs main env monad =
           let (acc_fd,acc_ma) = acc in
           let (fd,ma) = eval' fdefs e env acc_fd in
           (Func_Tbl.merge merge_vars fd acc_fd,
-            acc_ma@[ma]) ) (monad,[]) es
+            acc_ma@[ma]) ) (state,[]) es
     in
 
 
@@ -72,7 +72,7 @@ and eval' fdefs main env monad =
     else
     begin
       let s' = s^(env_string sas) in
-      let new_monad =
+      let new_state =
       match (Func_Tbl.find_opt s' rs_fd) with
       | Some _ -> rs_fd
       | None ->
@@ -83,13 +83,13 @@ and eval' fdefs main env monad =
       in
 
       let param = Env.fold (fun i e acc -> acc@[e]) das [] in
-      (new_monad,Apply(s',param))
+      (new_state,Apply(s',param))
 
     end
 
 
   | TL(e) ->
-    let (fd0,ma0) = eval' fdefs e env monad in
+    let (fd0,ma0) = eval' fdefs e env state in
     if isVal ma0
     then (match ma0 with
     | Const(TVal n) -> (fd0,Const(TVal (List.tl n)))
@@ -98,7 +98,7 @@ and eval' fdefs main env monad =
     else (fd0,TL(ma0))
 
   | HD(e) ->
-    let (fd0,ma0) = eval' fdefs e env monad in
+    let (fd0,ma0) = eval' fdefs e env state in
     if isVal ma0
     then (match ma0 with
     | Const(TVal n) -> (fd0,Const(List.hd n))
@@ -107,7 +107,7 @@ and eval' fdefs main env monad =
     else (fd0,HD(ma0))
 
   | Length(e) ->
-    let (fd0,ma0) = eval' fdefs e env monad in
+    let (fd0,ma0) = eval' fdefs e env state in
     if isVal ma0
     then (match ma0 with
     | Const(TVal n) -> (fd0,Const(IVal (List.length n)))
@@ -117,7 +117,7 @@ and eval' fdefs main env monad =
 
 
   | Fst(e) ->
-    let (fd0,ma0) = eval' fdefs e env monad in
+    let (fd0,ma0) = eval' fdefs e env state in
     if isVal ma0
     then (match ma0 with
     | Const(PVal(n1,n2)) -> (fd0,Const(n1))
@@ -126,7 +126,7 @@ and eval' fdefs main env monad =
     else (fd0,Fst(ma0))
 
   | Snd(e) ->
-    let (fd0,ma0) = eval' fdefs e env monad in
+    let (fd0,ma0) = eval' fdefs e env state in
     if isVal ma0
     then (match ma0 with
     | Const(PVal(n1,n2)) -> (fd0,Const(n2))
@@ -135,7 +135,7 @@ and eval' fdefs main env monad =
     else (fd0,Snd(ma0))
 
   | Exists(e1,e2) ->
-    let (fd1,ma1) = eval' fdefs e1 env monad in
+    let (fd1,ma1) = eval' fdefs e1 env state in
     let (fd2,ma2) = eval' fdefs e2 env fd1 in
     (match isVal ma1, isVal ma2 with
     | true,true ->
@@ -144,19 +144,48 @@ and eval' fdefs main env monad =
           let b = List.exists (fun i -> if (gFirst i) = (gVal ma1) then true else false) n in
                           (fd2,Const(BVal b))
         | _ -> failwith "arg 2 0f exists need t0 be a TVal")
+
+    | false,true ->
+      (match ma2 with
+        | Const(TVal n) ->
+          if (List.length n) == 0
+          then (fd2,Const(BVal false))
+          else
+          (fd2,List.fold_left (fun acc i ->
+            If(Prim(Eq,[ma1;Const(gFirst i)]),Const(BVal true),acc))
+          (Prim(Eq,[ma1;Const(gFirst (List.hd n))]))
+          (List.tl n))
+
+
+        | _ -> failwith "arg 2 0f exists need t0 be a TVal")
+
     | _,_ -> (fd2,Exists(ma1,ma2)))
 
   | Find(e1,e2) ->
-    let (fd1,ma1) = eval' fdefs e1 env monad in
+    let (fd1,ma1) = eval' fdefs e1 env state in
     let (fd2,ma2) = eval' fdefs e2 env fd1 in
 
-    if isVal ma1 && isVal ma2
-    then (match ma2 with
-    | Const(TVal n) -> let b = List.find (fun i -> if (gFirst i) = (gVal ma1) then true else false) n in
-                      (fd2,Const(b))
-    | _ -> failwith "arg 2 0f find need t0 be a TVal")
+    (match isVal ma1, isVal ma2 with
+      | true,true ->
+        (match ma2 with
+          | Const(TVal n) -> let b = List.find (fun i -> if (gFirst i) = (gVal ma1) then true else false) n in
+                        (fd2,Const(b))
+          | _ -> failwith "arg 2 0f find need t0 be a TVal")
 
-    else (fd2,Find(ma1,ma2))
+      | false,true ->
+        (match ma2 with
+          | Const(TVal n) ->
+            if (List.length n) == 0
+            then (fd2,Const(BVal false))
+            else
+            (fd2,List.fold_left (fun acc i ->
+              If(Prim(Eq,[ma1;Const(gFirst i)]),Const i ,acc))
+            (If(Prim(Eq,[ma1;Const(gFirst (List.hd n))]),Const(List.hd n),Const(BVal false)))
+            (List.tl n))
+          | _ -> failwith "arg 2 0f find need t0 be a TVal"
+            )
+
+      |_,_ -> (fd2,Find(ma1,ma2)) )
 
 
 and env_string env =

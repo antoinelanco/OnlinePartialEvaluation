@@ -1,0 +1,18 @@
+Apply(
+run_636770284
+[
+  Tl(Var(ls)),
+  Snd(
+        Find(Hd(Var(ls)),Const(TVal(PVal(CVal(a),IVal(2)))))
+    )
+]
+)
+
+1 - isoler le parametre avec le find
+2 - rcup tout se quon aplique au find (dans notre exemple snd())
+3 - transorfer en if(if(if)) avec le apply
+
+
+If(Prim(Eq[Hd(Var(ls));Const(CVal a)]))
+(Applay(run_AAA[Snd(PVal(CVal(a),IVal(2)))]))
+(fail)

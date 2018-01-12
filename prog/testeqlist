@@ -1,1 +1,1 @@
-([], prim equal [const (tval [cval "a";cval "b";cval "c"]),const (tval [cval "a";cval "b";cval "c"])] )
+([], exists(var "a",const(tval[cval "a";cval "b";cval "c"])) )
