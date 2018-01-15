@@ -1,1 +1,13 @@
-([], exists(var "a",const(tval[cval "a";cval "b";cval "c"])) )
+(
+[
+"run",
+(
+["t",ls"],
+  if
+  (prim equal [var "ls", const(tval[])] )
+  (const(ival 1))
+  (apply "run" [find(var "ls", var "t"),tl(var "ls")]))
+)
+],
+  apply "run" [ const(tval[ival 2;ival 3]),var "x"]
+)

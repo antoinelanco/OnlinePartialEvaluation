@@ -11,6 +11,7 @@ let rec eval p = (* Prog -> Prog *)
 and eval' fdefs main env state =
   match main with
   | Const(v)   -> (state,Const(v))
+
   | Var(s)     ->
     let v = Env.find_opt s env in
     (match v with
@@ -31,7 +32,6 @@ and eval' fdefs main env state =
     then (fd,Const(prim o (getVal ma)))
     else (fd,Prim(o,ma))
 
-
   | If(e0,e1,e2) ->
     let (fd0,ma0) = eval' fdefs e0 env state in
     if isVal ma0
@@ -45,6 +45,7 @@ and eval' fdefs main env state =
       (fd2,If(ma0,ma1,ma2)))
 
   | Apply(s,es) ->
+
 
     let (ss,body) = Func_Tbl.find s fdefs in
 
@@ -64,6 +65,7 @@ and eval' fdefs main env state =
         Env.empty ss rs_ma
     in
 
+
     let sas = Env.filter(fun s r -> if isVal r then true else false) z in
     let das = Env.filter(fun s r -> if isVal r then false else true) z in
 
@@ -71,22 +73,36 @@ and eval' fdefs main env state =
     then eval' fdefs body sas rs_fd
     else
     begin
-      let s' = s^(env_string sas) in
-      let new_state =
-      match (Func_Tbl.find_opt s' rs_fd) with
-      | Some _ -> rs_fd
-      | None ->
-        let n_m = Func_Tbl.add s' ([],Const(IVal(0))) rs_fd in
-        let (e'_fd,e'_ma) = eval' fdefs body sas n_m in
-        let new_das = Env.fold (fun s r acc -> acc@[s] ) das [] in
-        Func_Tbl.add s' (new_das,e'_ma) e'_fd
-      in
+      (match findfind das with
+        | Some (elemfind,k) ->
+          let (bef,aft) = getBeforFindAndExists elemfind in
+          (match aft with
+            | Find (e1,e2) ->
+            if isVal e2 then
+            (match e2 with
+              | Const(TVal n) ->
+                let das = Env.remove k das in
+                List.fold_left (fun acc i ->
+                 let (a1,a2) = eval' fdefs (bef (Const i)) sas rs_fd in
+                 let new_sas = Env.add k a2 sas in
+                 let (p1,p2) = newApply s new_sas das a1 fdefs body in
+                 (Func_Tbl.merge merge_vars p1 (fst acc),If(Prim(Eq,[e1;Const(gFirst i)]),p2 ,(snd acc))) )
 
-      let param = Env.fold (fun i e acc -> acc@[e]) das [] in
-      (new_state,Apply(s',param))
 
+                 (
+
+                 let (a1,a2) = eval' fdefs (bef (Const (List.hd n))) sas rs_fd in
+                 let (p1,p2) = newApply s (Env.add k a2 sas) das a1 fdefs body in
+                 (p1,(If(Prim(Eq,[e1;Const(gFirst (List.hd n))]),p2,Const(BVal false)))))
+                (List.tl n)
+
+            | _ -> failwith "apply arg 2 0f find need t0 be a TVal")
+            else newApply s sas das rs_fd fdefs body
+
+          | _ -> failwith "forcement un find")
+        | _ -> newApply s sas das rs_fd fdefs body)
+        (* newApply s sas das rs_fd fdefs body *)
     end
-
 
   | TL(e) ->
     let (fd0,ma0) = eval' fdefs e env state in
@@ -114,7 +130,6 @@ and eval' fdefs main env state =
     | _ -> failwith "Length 0nly with TVal")
 
     else (fd0,HD(ma0))
-
 
   | Fst(e) ->
     let (fd0,ma0) = eval' fdefs e env state in
@@ -145,7 +160,7 @@ and eval' fdefs main env state =
                           (fd2,Const(BVal b))
         | _ -> failwith "arg 2 0f exists need t0 be a TVal")
 
-    | false,true ->
+    (* | false,true ->
       (match ma2 with
         | Const(TVal n) ->
           if (List.length n) == 0
@@ -157,7 +172,7 @@ and eval' fdefs main env state =
           (List.tl n))
 
 
-        | _ -> failwith "arg 2 0f exists need t0 be a TVal")
+        | _ -> failwith "arg 2 0f exists need t0 be a TVal") *)
 
     | _,_ -> (fd2,Exists(ma1,ma2)))
 
@@ -172,29 +187,94 @@ and eval' fdefs main env state =
                         (fd2,Const(b))
           | _ -> failwith "arg 2 0f find need t0 be a TVal")
 
-      | false,true ->
+      (* | false,true ->
         (match ma2 with
           | Const(TVal n) ->
-            if (List.length n) == 0
-            then (fd2,Const(BVal false))
-            else
             (fd2,List.fold_left (fun acc i ->
               If(Prim(Eq,[ma1;Const(gFirst i)]),Const i ,acc))
             (If(Prim(Eq,[ma1;Const(gFirst (List.hd n))]),Const(List.hd n),Const(BVal false)))
             (List.tl n))
           | _ -> failwith "arg 2 0f find need t0 be a TVal"
-            )
+            ) *)
 
       |_,_ -> (fd2,Find(ma1,ma2)) )
 
 
 and env_string env =
 
-let a =
-Env.fold(fun i e acc -> Printf.sprintf "%s_%s:%s" acc i (print_expr e)) env ""
-in
+  let a =
+  Env.fold(fun i e acc -> Printf.sprintf "%s_%s:%s" acc i (print_expr e)) env ""
+  in
 
-Printf.sprintf "_%s" (string_of_int (Hashtbl.hash a))
+  Printf.sprintf "_%s" (string_of_int (Hashtbl.hash a))
+
+and print_env = Env.iter (fun k e -> Printf.printf "\nEnv %s -> %s\n" k (print_expr e) )
+
+and newApply s sas das state fdefs body =
+  let s' = s^(env_string sas) in
+  let new_state =
+  match (Func_Tbl.find_opt s' state) with
+  | Some _ -> state
+  | None ->
+    let n_m = Func_Tbl.add s' ([],Const(IVal(0))) state in
+    let (e'_fd,e'_ma) = eval' fdefs body sas n_m in
+    let new_das = Env.fold (fun s _ acc -> acc@[s] ) das [] in
+    Func_Tbl.add s' (new_das,e'_ma) e'_fd
+  in
+
+  let param = Env.fold (fun i e acc -> acc@[e]) das [] in
+  (new_state,Apply(s',param))
+
+
+and getBeforFindAndExists exp_r =
+  let rec aux acc = function
+  | Snd e -> aux (fun x -> acc (Snd x)) e
+  | Find (e1,e2) -> (acc,Find(e1,e2))
+  | Exists (e1,e2) -> (acc,Exists(e1,e2))
+  | n -> Printf.printf "%s" (print_expr n); failwith "a faire"
+  in
+
+  aux (fun x -> x) exp_r
+
+and findfind expr_list =
+  Env.fold (fun k i acc ->
+  if (existsfind i)
+  then Some (i,k)
+  else acc)
+  expr_list None
+
+and findexists expr_list =
+  Env.fold (fun k i acc ->
+  if (existsexists i)
+  then Some (i,k)
+  else acc)
+  expr_list None
+
+and existsfind = function
+  | Const _ | Var _ -> false
+  | Prim(_,es) -> List.exists(fun i -> existsfind i ) es
+  | If(e0,e1,e2) -> (existsfind e0) || (existsfind e1) || (existsfind e2)
+  | Apply(_,es) -> List.exists(fun i -> existsfind i ) es
+  | TL(e) -> existsfind e
+  | HD(e) -> existsfind e
+  | Length(e) -> existsfind e
+  | Fst(e) -> existsfind e
+  | Snd(e) -> existsfind e
+  | Exists(e1,e2) -> (existsfind e1) || (existsfind e2)
+  | Find _ -> true
+
+and existsexists = function
+  | Const _ | Var _ -> false
+  | Prim(_,es) -> List.exists(fun i -> existsexists i ) es
+  | If(e0,e1,e2) -> (existsexists e0) || (existsexists e1) || (existsexists e2)
+  | Apply(_,es) -> List.exists(fun i -> existsexists i ) es
+  | TL(e) -> existsexists e
+  | HD(e) -> existsexists e
+  | Length(e) -> existsexists e
+  | Fst(e) -> existsexists e
+  | Snd(e) -> existsexists e
+  | Exists _ -> true
+  | Find(e1,e2) -> (existsexists e1) || (existsexists e2)
 
 and prim o rs =
   if List.length rs <> 2 then failwith "Bin0p need 0nly 2 arg";

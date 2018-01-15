@@ -1,1 +1,1 @@
-([], snd (const(pval(ival 1,ival 2))) )
+([], snd(find(snd(const(pval(cval "a" ,ival 2 ))),const(tval[pval(ival 1 ,tval(pval(cval "a",ival 2 )));pval(ival 2 ,tval(pval(cval "b" ,ival 1 )))]))))

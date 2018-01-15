@@ -9,14 +9,14 @@
      if (exists(var "s", var "t"))
         (
         if(exists(hd(var "ls"),snd(find(var "s", var "t"))))
-        (apply "run" [
 
-        snd(
-        find(
-        hd(var "ls"),snd(find(var "s", var "t"))
+
+
+        (
+            apply "run" [snd(find(hd(var "ls"),snd(find(var "s", var "t")))),var "a",var "t", tl(var "ls")]
         )
-        )
-        ,var "a",var "t", tl(var "ls")])
+
+
         (const(bval false))
         )
         (const(bval false))
@@ -25,8 +25,8 @@
 ],
   apply "run" [
    const(ival 1),
-   const(tval[ival 1]),
-   const(tval[pval(ival 1,tval[pval(cval "a",ival 2)]);pval(ival 2,tval[pval(cval "b",ival 1)])]),
+   const(tval[ival 2]),
+   const(tval[pval(ival 1,tval[pval(cval "a",ival 2)]);pval(ival 2,tval[pval(cval "b",ival 1);pval(cval "c", ival 1)])]),
    var "x"
   ]
 )

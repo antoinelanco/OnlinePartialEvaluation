@@ -9,15 +9,14 @@
      if (exists(var "s", var "t"))
         (
         if(exists(hd(var "ls"),snd(find(var "s", var "t"))))
+        (apply "run" [
 
-
-
-        ( if(prim equal [const(ival 1),length(snd(find(var "s", var "t")))])
-            (apply "run" [snd(hd(snd(find(var "s", var "t")))),var "a",var "t", tl(var "ls")])
-            (apply "run" [snd(find(hd(var "ls"),snd(find(var "s", var "t")))),var "a",var "t", tl(var "ls")])
+        snd(
+        find(
+        hd(var "ls"),snd(find(var "s", var "t"))
         )
-
-
+        )
+        ,var "a",var "t", tl(var "ls")])
         (const(bval false))
         )
         (const(bval false))
@@ -26,17 +25,8 @@
 ],
   apply "run" [
    const(ival 1),
-   const(tval[ival 2]),
-   const(
-   tval[
-    pval(ival 1, tval[pval(cval "a", ival 2);pval(cval "b", ival 3)]);
-    pval(ival 2, tval[pval(cval "c", ival 4)]);
-    pval(ival 3, tval[pval(cval "d", ival 4)]);
-    pval(ival 4, tval[pval(cval "e", ival 1)])
-
-
-
-  ]),
+   const(tval[ival 1]),
+   const(tval[pval(ival 1,tval[pval(cval "a",ival 2)]);pval(ival 2,tval[pval(cval "b",ival 1)])]),
    var "x"
   ]
 )
