@@ -15,7 +15,7 @@ let addLib p =
   let exists = Func_Tbl.singleton "funexists" (["el";"tab"],
     If(Prim(Eq,[Var("tab");Const(TVal([]))]),
     Const(BVal false),
-    If(Prim(Eq,[Var("el");HD(Var("tab"))]),
+    If(Prim(Eq,[Var("el");Apply("fungeteven",[HD(Var("tab"))])]),
     Const(BVal(true)),
     Apply("funexists",[Var("el");TL(Var("tab"))])))
     ) in

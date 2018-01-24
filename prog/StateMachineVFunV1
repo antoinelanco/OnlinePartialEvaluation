@@ -4,11 +4,11 @@
 (
 ["s","a","t","ls"],
   if (prim equal [var "ls", const(tval[])] )
-     (exists(var "s",var "a"))
+     (apply "funexists" [var "s", var "a"])
      (
-     if (exists(var "s", var "t"))
+     if (apply "funexists" [var "s", var "t"])
         (
-        if(exists(hd(var "ls"),snd(find(var "s", var "t"))))
+        if(apply "funexists" [hd(var "ls"),snd(apply "funfind" [var "s", var "t"])])
         (
 
         apply "run" [
