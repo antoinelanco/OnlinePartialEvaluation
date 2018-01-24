@@ -25,6 +25,7 @@
         "pval",     PVAL;
         "fst",      FST;
         "snd",      SND;
+        "iseven",   ISEVEN;
         "tl",       TL;
         "hd",       HD;
         "length",   LENGTH;
@@ -40,7 +41,7 @@
       with Not_found -> IDENT(s)
 
 
-# 44 "Lexer.ml"
+# 45 "Lexer.ml"
 let __ocaml_lex_tables = {
   Lexing.lex_base = 
    "\000\000\244\255\245\255\246\255\247\255\248\255\249\255\250\255\
@@ -158,64 +159,64 @@ let rec token lexbuf =
 and __ocaml_lex_token_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
-# 49 "Lexer.mll"
+# 50 "Lexer.mll"
       ( token lexbuf )
-# 164 "Lexer.ml"
+# 165 "Lexer.ml"
 
   | 1 ->
-# 51 "Lexer.mll"
+# 52 "Lexer.mll"
       ( id_or_keyword (lexeme lexbuf) )
-# 169 "Lexer.ml"
+# 170 "Lexer.ml"
 
   | 2 ->
-# 53 "Lexer.mll"
+# 54 "Lexer.mll"
       ( LITINT (int_of_string (lexeme lexbuf)) )
-# 174 "Lexer.ml"
+# 175 "Lexer.ml"
 
   | 3 ->
-# 55 "Lexer.mll"
+# 56 "Lexer.mll"
       ( DCOTE )
-# 179 "Lexer.ml"
+# 180 "Lexer.ml"
 
   | 4 ->
-# 57 "Lexer.mll"
+# 58 "Lexer.mll"
       ( BEGIN )
-# 184 "Lexer.ml"
+# 185 "Lexer.ml"
 
   | 5 ->
-# 59 "Lexer.mll"
+# 60 "Lexer.mll"
       ( END )
-# 189 "Lexer.ml"
+# 190 "Lexer.ml"
 
   | 6 ->
-# 61 "Lexer.mll"
+# 62 "Lexer.mll"
       ( BB )
-# 194 "Lexer.ml"
+# 195 "Lexer.ml"
 
   | 7 ->
-# 63 "Lexer.mll"
+# 64 "Lexer.mll"
       ( EB )
-# 199 "Lexer.ml"
+# 200 "Lexer.ml"
 
   | 8 ->
-# 65 "Lexer.mll"
+# 66 "Lexer.mll"
       ( COMMA )
-# 204 "Lexer.ml"
+# 205 "Lexer.ml"
 
   | 9 ->
-# 67 "Lexer.mll"
+# 68 "Lexer.mll"
       ( SEMI )
-# 209 "Lexer.ml"
+# 210 "Lexer.ml"
 
   | 10 ->
-# 69 "Lexer.mll"
+# 70 "Lexer.mll"
       ( EOF )
-# 214 "Lexer.ml"
+# 215 "Lexer.ml"
 
   | 11 ->
-# 71 "Lexer.mll"
+# 72 "Lexer.mll"
       (raise (Error (sprintf "Unknow Token %s" (lexeme lexbuf))))
-# 219 "Lexer.ml"
+# 220 "Lexer.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf; 
       __ocaml_lex_token_rec lexbuf __ocaml_lex_state

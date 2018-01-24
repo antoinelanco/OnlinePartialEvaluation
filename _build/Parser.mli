@@ -14,6 +14,7 @@ type token =
   | LITINT of (int)
   | LENGTH
   | IVAL
+  | ISEVEN
   | IF
   | IDENT of (string)
   | HD

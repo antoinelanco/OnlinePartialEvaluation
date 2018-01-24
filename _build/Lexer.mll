@@ -24,6 +24,7 @@
         "pval",     PVAL;
         "fst",      FST;
         "snd",      SND;
+        "iseven",   ISEVEN;
         "tl",       TL;
         "hd",       HD;
         "length",   LENGTH;

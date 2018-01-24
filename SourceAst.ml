@@ -26,6 +26,7 @@ and expr =
   | Length of expr
   | Fst    of expr
   | Snd    of expr
+  | IsEven of expr
   | Exists of expr * expr
   | Find   of expr * expr
 
@@ -64,6 +65,7 @@ and print_exprv2 space now = function
 | Length(e)     -> sprintf "%sLength(%s)" now (print_exprv2 space "" e)
 | Fst(e)        -> sprintf "%sFst(%s)" now (print_exprv2 space "" e)
 | Snd(e)        -> sprintf "%sSnd(%s)" now (print_exprv2 space "" e)
+| IsEven(e)     -> sprintf "%sIsEven(%s)" now (print_exprv2 space "" e)
 | Exists(e1,e2) -> sprintf "%sExists(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
 | Find(e1,e2)   -> sprintf "%sFind(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
 
@@ -87,6 +89,7 @@ and print_expr = function
 | Length(e)     -> sprintf "Length(%s)" (print_expr e)
 | Fst(e)        -> sprintf "Fst(%s)" (print_expr e)
 | Snd(e)        -> sprintf "Snd(%s)" (print_expr e)
+| IsEven(e)     -> sprintf "IsEven(%s)" (print_expr e)
 | Exists(e1,e2) -> sprintf "Exists(%s,%s)" (print_expr e1) (print_expr e2)
 | Find(e1,e2)   -> sprintf "Find(%s,%s)" (print_expr e1) (print_expr e2)
 

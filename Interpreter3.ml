@@ -117,6 +117,16 @@ and eval' fdefs main env state =
 
     else (fd0,Snd(ma0))
 
+  | IsEven(e) ->
+    let (fd0,ma0) = eval' fdefs e env state in
+    if isVal ma0
+    then (match ma0 with
+    | Const(PVal _) -> (fd0,Const(BVal true))
+    | _ -> (fd0,Const(BVal false)))
+
+    else (fd0,IsEven(ma0))
+
+
   | Exists(e1,e2) ->
     let (fd1,ma1) = eval' fdefs e1 env state in
     let (fd2,ma2) = eval' fdefs e2 env fd1 in
@@ -241,6 +251,7 @@ and getBeforIf exp_r =
   let rec aux acc = function
   | Snd e -> aux (fun x -> acc (Snd x)) e
   | Fst e -> aux (fun x -> acc (Fst x)) e
+  | IsEven e -> aux (fun x -> acc (IsEven x)) e
   | TL  e -> aux (fun x -> acc (TL x)) e
   | HD  e -> aux (fun x -> acc (HD x)) e
   | Length e -> aux (fun x -> acc (Length x)) e
@@ -266,6 +277,7 @@ and existsif = function
   | Length(e) -> existsif e
   | Fst(e) -> existsif e
   | Snd(e) -> existsif e
+  | IsEven(e) -> existsif e
   | _ -> false
 
 and prim o rs =
@@ -298,6 +310,7 @@ and ifExpProf = function
   | Length(e) -> ifExpProf e
   | Fst(e) -> ifExpProf e
   | Snd(e) -> ifExpProf e
+  | IsEven(e) -> ifExpProf e
   | Exception -> true
 
 and val_to_bool = function

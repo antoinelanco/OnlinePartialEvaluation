@@ -17,7 +17,7 @@
 %token BB EB
 %token DCOTE
 %token EOF
-%token FST SND
+%token FST SND ISEVEN
 %token EXISTS FIND
 %token EXCEP
 
@@ -67,6 +67,7 @@ expr:
 | LENGTH; BEGIN; e=expr; END { Length(e) }
 | FST; BEGIN; e=expr; END { Fst(e) }
 | SND; BEGIN; e=expr; END { Snd(e) }
+| ISEVEN; BEGIN e=expr; END { IsEven(e) }
 | EXISTS; BEGIN; e1=expr; COMMA; e2=expr; END { Exists(e1,e2) }
 | FIND; BEGIN; e1=expr; COMMA; e2=expr; END { Find(e1,e2) }
 

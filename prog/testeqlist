@@ -1,14 +1,4 @@
 (
-[
-"findfun",
-(
-["el","tab"],
-  if (prim equal [var "tab", const(tval[])] )
-    (exception)
-    (if (prim equal [var "el", hd(var "tab")] )
-    (const(bval true))
-    (apply "findfun" [var "el" ,tl(var "tab")] ) )
-
-)],
-  apply "findfun" [var "x", var "y"]
+[],
+  apply "funfind" [const(ival 3), const(tval[pval(ival 2,cval "b"); pval(ival 3,cval "e")])]
 )
