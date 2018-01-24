@@ -19,10 +19,14 @@ menhir --ocamlc 'ocamlfind ocamlc -w -40' --infer Parser.mly
 ocamlfind ocamldep -modules Parser.mli > Parser.mli.depends
 # Target: Parser.cmi, tags: { byte, compile, extension:mli, file:Parser.mli, interf, ocaml, quiet }
 ocamlfind ocamlc -c -w -40 -o Parser.cmi Parser.mli
+# Target: Lib.ml.depends, tags: { extension:ml, file:Lib.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules Lib.ml > Lib.ml.depends
 # Target: Interpreter3.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Interpreter3.cmo, file:Interpreter3.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -w -40 -o Interpreter3.cmo Interpreter3.ml
 # Target: Lexer.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Lexer.cmo, file:Lexer.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -w -40 -o Lexer.cmo Lexer.ml
+# Target: Lib.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Lib.cmo, file:Lib.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -w -40 -o Lib.cmo Lib.ml
 # Target: Main.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Main.cmo, file:Main.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -w -40 -o Main.cmo Main.ml
 # Target: SourceAst.cmx, tags: { compile, extension:cmx, extension:ml, file:SourceAst.cmx, file:SourceAst.ml, implem, native, ocaml, quiet }
@@ -35,8 +39,10 @@ ocamlfind ocamlopt -c -w -40 -o Parser.cmx Parser.ml
 ocamlfind ocamlopt -c -w -40 -o Interpreter3.cmx Interpreter3.ml
 # Target: Lexer.cmx, tags: { compile, extension:cmx, extension:ml, file:Lexer.cmx, file:Lexer.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -w -40 -o Lexer.cmx Lexer.ml
+# Target: Lib.cmx, tags: { compile, extension:cmx, extension:ml, file:Lib.cmx, file:Lib.ml, implem, native, ocaml, quiet }
+ocamlfind ocamlopt -c -w -40 -o Lib.cmx Lib.ml
 # Target: Main.cmx, tags: { compile, extension:cmx, extension:ml, file:Main.cmx, file:Main.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -w -40 -o Main.cmx Main.ml
 # Target: Main.native, tags: { dont_link_with, extension:native, file:Main.native, link, native, ocaml, program, quiet }
-ocamlfind ocamlopt -linkpkg SourceAst.cmx Interpreter3.cmx Parser.cmx Lexer.cmx Main.cmx -o Main.native
+ocamlfind ocamlopt -linkpkg SourceAst.cmx Interpreter3.cmx Parser.cmx Lexer.cmx Lib.cmx Main.cmx -o Main.native
 # Compilation successful.

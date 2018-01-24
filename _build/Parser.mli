@@ -21,6 +21,7 @@ type token =
   | FIND
   | FALSE
   | EXISTS
+  | EXCEP
   | EQ
   | EOF
   | END

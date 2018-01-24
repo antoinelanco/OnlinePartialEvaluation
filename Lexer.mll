@@ -32,6 +32,7 @@
         "sub",      SUB;
         "true",     TRUE;
         "false",    FALSE;
+        "exception",EXCEP;
       ] ;
     fun s ->
       try  Hashtbl.find h s

@@ -19,6 +19,7 @@
 %token EOF
 %token FST SND
 %token EXISTS FIND
+%token EXCEP
 
 %start prog
 %type <SourceAst.prog> prog
@@ -55,6 +56,7 @@ vall:
 | PVAL; BEGIN; e1=vall; COMMA; e2=vall; END { PVal(e1,e2) }
 
 expr:
+| EXCEP { Exception }
 | CONST; BEGIN; v=vall; END { Const(v) }
 | VAR; id=str { Var(id) }
 | APPLAY; id=str BB; es=separated_list(COMMA, expr); EB { Apply(id,es) }

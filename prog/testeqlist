@@ -1,13 +1,14 @@
 (
 [
-"run",
+"findfun",
 (
-["t",ls"],
-  if
-  (prim equal [var "ls", const(tval[])] )
-  (const(ival 1))
-  (apply "run" [find(var "ls", var "t"),tl(var "ls")]))
-)
-],
-  apply "run" [ const(tval[ival 2;ival 3]),var "x"]
+["el","tab"],
+  if (prim equal [var "tab", const(tval[])] )
+    (exception)
+    (if (prim equal [var "el", hd(var "tab")] )
+    (const(bval true))
+    (apply "findfun" [var "el" ,tl(var "tab")] ) )
+
+)],
+  apply "findfun" [var "x", var "y"]
 )

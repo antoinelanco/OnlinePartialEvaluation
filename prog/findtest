@@ -1,0 +1,1 @@
+([],apply "funfind" [var "x", const(tval[ival 1;ival 2])])
