@@ -17,9 +17,10 @@
 %token BB EB
 %token DCOTE
 %token EOF
-%token FST SND ISEVEN
+%token FST SND ISPAIR
 %token EXISTS FIND
 %token EXCEP
+%token SWITCH
 
 %start prog
 %type <SourceAst.prog> prog
@@ -67,9 +68,13 @@ expr:
 | LENGTH; BEGIN; e=expr; END { Length(e) }
 | FST; BEGIN; e=expr; END { Fst(e) }
 | SND; BEGIN; e=expr; END { Snd(e) }
-| ISEVEN; BEGIN e=expr; END { IsEven(e) }
+| ISPAIR; BEGIN e=expr; END { IsPair(e) }
 | EXISTS; BEGIN; e1=expr; COMMA; e2=expr; END { Exists(e1,e2) }
 | FIND; BEGIN; e1=expr; COMMA; e2=expr; END { Find(e1,e2) }
+| SWITCH; BEGIN; e1=expr; END; BB; es=separated_nonempty_list(SEMI, case); EB; BEGIN; e2=expr; END { Switch (e1,es,e2) }
+
+case:
+| BEGIN; v1=vall; COMMA; e2=expr; END { (v1,e2) }
 
 op:
 | MULT { Mult }

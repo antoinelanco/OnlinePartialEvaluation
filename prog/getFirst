@@ -1,1 +1,1 @@
-([],apply "fungeteven" [ const(pval(pval(cval "b", ival 3), cval "a")) ])
+([],apply "fungetpair" [ const(pval(pval(cval "b", ival 3), cval "a")) ])

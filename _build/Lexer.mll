@@ -24,7 +24,7 @@
         "pval",     PVAL;
         "fst",      FST;
         "snd",      SND;
-        "iseven",   ISEVEN;
+        "ispair",   ISPAIR;
         "tl",       TL;
         "hd",       HD;
         "length",   LENGTH;
@@ -34,6 +34,7 @@
         "true",     TRUE;
         "false",    FALSE;
         "exception",EXCEP;
+        "switch",   SWITCH;
       ] ;
     fun s ->
       try  Hashtbl.find h s

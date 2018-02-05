@@ -5,6 +5,7 @@ type token =
   | TVAL
   | TRUE
   | TL
+  | SWITCH
   | SUB
   | SND
   | SEMI
@@ -14,7 +15,7 @@ type token =
   | LITINT of (int)
   | LENGTH
   | IVAL
-  | ISEVEN
+  | ISPAIR
   | IF
   | IDENT of (string)
   | HD

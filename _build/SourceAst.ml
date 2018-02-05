@@ -26,9 +26,12 @@ and expr =
   | Length of expr
   | Fst    of expr
   | Snd    of expr
-  | IsEven of expr
+  | IsPair of expr
   | Exists of expr * expr
   | Find   of expr * expr
+  | Switch of expr * case list * expr
+
+and case = vall * expr
 
 and op =
   | Add
@@ -58,24 +61,35 @@ and print_exprv2 space now = function
 | Exception      -> sprintf "%sException" now
 | Const(v)      -> sprintf "%s%s" now (print_val v)
 | Var(s)        -> sprintf "%s%s" now s
-| Prim(o,es)    -> sprintf "%s%s%s%s" now (print_exprv2 space "" (List.hd es)) (print_op o) (print_exprv2 space "" (List.hd (List.tl es)))
+| Prim(o,es)    -> sprintf "%s%s%s%s" now (print_exprv2 space "" (List.hd es))
+                   (print_op o) (print_exprv2 space "" (List.hd (List.tl es)))
 | Apply(s,es)   -> sprintf "%s%s(%s)" now s (print_list_expr es)
 | TL(e)         -> sprintf "%sTl(%s)" now (print_exprv2 space "" e)
 | HD(e)         -> sprintf "%sHd(%s)" now (print_exprv2 space "" e)
 | Length(e)     -> sprintf "%sLength(%s)" now (print_exprv2 space "" e)
 | Fst(e)        -> sprintf "%sFst(%s)" now (print_exprv2 space "" e)
 | Snd(e)        -> sprintf "%sSnd(%s)" now (print_exprv2 space "" e)
-| IsEven(e)     -> sprintf "%sIsEven(%s)" now (print_exprv2 space "" e)
+| IsPair(e)     -> sprintf "%sIsPair(%s)" now (print_exprv2 space "" e)
 | Exists(e1,e2) -> sprintf "%sExists(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
 | Find(e1,e2)   -> sprintf "%sFind(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
+| Switch(e1,es,e2) -> sprintf "%sSwitch(%s)(\n%s%sDefault -> %s)"
+  now (print_exprv2 (space^"   ") "" e1) (print_case es (space^"   "))
+  (space^"   ") (print_exprv2 (space^"   ") "" e2)
 
-| If(e0,e1,e2)  -> sprintf "%sif(%s){\n%s\n%s}else{\n%s\n%s}"
-now
-(print_exprv2 (space^"   ") "" e0)
+| If(e0,e1,e2)  -> sprintf "%sIf(%s){\n%s\n%s}Else{\n%s\n%s}"
+now (print_exprv2 (space^"   ") "" e0)
 (print_exprv2 (space^"   ") (space^"   ") e1)
+space (print_exprv2 (space^"   ") (space^"   ") e2)
 space
-(print_exprv2 (space^"   ") (space^"   ") e2)
-space
+
+
+and print_case es space =
+  let tmp = List.fold_left
+  (fun acc (i1,i2) -> acc^space^"Case("^(print_val i1)^") -> "^(print_exprv2 space "" i2 )^"\n")
+  "" es in
+
+  tmp
+
 
 and print_expr = function
 | Exception      -> sprintf "Exception"
@@ -89,9 +103,10 @@ and print_expr = function
 | Length(e)     -> sprintf "Length(%s)" (print_expr e)
 | Fst(e)        -> sprintf "Fst(%s)" (print_expr e)
 | Snd(e)        -> sprintf "Snd(%s)" (print_expr e)
-| IsEven(e)     -> sprintf "IsEven(%s)" (print_expr e)
+| IsPair(e)     -> sprintf "IsPair(%s)" (print_expr e)
 | Exists(e1,e2) -> sprintf "Exists(%s,%s)" (print_expr e1) (print_expr e2)
 | Find(e1,e2)   -> sprintf "Find(%s,%s)" (print_expr e1) (print_expr e2)
+| Switch(e1,es,e2) -> sprintf "Switch(%s)(\n%sDefault -> %s)" (print_expr e1) (print_case es "   ") (print_expr e2)
 
 and print_val = function
 | IVal i       -> sprintf "%d" i

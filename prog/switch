@@ -1,0 +1,3 @@
+([],
+switch (var "x") [(ival 1,var "x");(ival 2,prim mul [var "x",const(ival 2)])] (exception)
+)
