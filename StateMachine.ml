@@ -8,22 +8,22 @@ type input = label list
 
 let rec run s a t ls =
 
-(* Version petite langaue *)
-if ls = []
-then List.mem s a
-else begin
-  if List.exists (fun i -> if (fst i) == s then true else false) t
-  then begin
-    if List.exists (fun i -> if (fst i) == (List.hd ls) then true else false)  (snd(List.find (fun i -> if s == (fst i) then true else false) t))
-    then run
-      (snd(List.find (fun j -> if (fst j) == (List.hd ls) then true else false ) (snd(List.find (fun i -> if s == (fst i) then true else false) t))))
-      a
-      t
-      (List.tl ls)
+  (* Version petite langaue *)
+  if ls = []
+  then List.mem s a
+  else begin
+    if List.exists (fun i -> if (fst i) == s then true else false) t
+    then begin
+      if List.exists (fun i -> if (fst i) == (List.hd ls) then true else false)  (snd(List.find (fun i -> if s == (fst i) then true else false) t))
+      then run
+          (snd(List.find (fun j -> if (fst j) == (List.hd ls) then true else false ) (snd(List.find (fun i -> if s == (fst i) then true else false) t))))
+          a
+          t
+          (List.tl ls)
+      else false
+    end
     else false
   end
-  else false
-end
 
 
 
@@ -46,15 +46,15 @@ let main =
 
   (* Machine 1 *)
   (* let s = 1 in
-  let a = [2] in
-  let t = Trans.add 1 [('a', 2)] (Trans.singleton 2 [('b', 1)]) in
-  let ls = ['a';'b';'a';'b';'a'] in *)
+     let a = [2] in
+     let t = Trans.add 1 [('a', 2)] (Trans.singleton 2 [('b', 1)]) in
+     let ls = ['a';'b';'a';'b';'a'] in *)
 
   (* Machine 2 *)
   (* let s = 1 in
-  let a = [1] in
-  let t = Trans.singleton 1 [('a', 1);('b', 1)] in
-  let ls = ['a';'a';'a';'b';'a'] in *)
+     let a = [1] in
+     let t = Trans.singleton 1 [('a', 1);('b', 1)] in
+     let ls = ['a';'a';'a';'b';'a'] in *)
 
   (* Machine 3 *)
   let s = 1 in

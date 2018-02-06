@@ -40,7 +40,7 @@ and eval' fdefs main env =
     let (ss,body) = Func_Tbl.find s fdefs in
     let env' = List.fold_left2
         (fun acc str ee ->
-          Env.add str (eval' fdefs ee env) acc)
+           Env.add str (eval' fdefs ee env) acc)
         Env.empty ss es in
 
     eval' fdefs body env'

@@ -1,3 +1,5 @@
 ([],
-switch (var "x") [(ival 1,var "x");(ival 2,prim mul [var "x",const(ival 2)])] (exception)
+if(exists(var "l",const(tval[ival 1;ival 2])))
+(find(var "l",const(tval[ival 1;ival 2])))
+(exception)
 )

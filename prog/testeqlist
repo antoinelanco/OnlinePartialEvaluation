@@ -1,4 +1,4 @@
 (
 [],
-  apply "funfind" [const(ival 3), const(tval[pval(ival 2,cval "b"); pval(ival 3,cval "e")])]
+  exists (var "a", const(tval[pval(ival 2,cval "b"); pval(ival 3,cval "e")]) )
 )
