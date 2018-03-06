@@ -1,0 +1,33 @@
+(
+[
+"run",
+(
+["d","s","a","t","ls","token"],
+  if(prim equal [length(var "ls"), const(ival 0)])
+    (if(exists(var "s",var "a"))
+       (prim add[var "token",snd(find(var "s",var "a"))])
+       (exception))
+    (if(exists(var "s", var "t"))
+       (if(exists(hd(var "ls"),snd(find(var "s", var "t"))))
+          (apply "run" [var "d",snd(find(hd(var "ls"),snd(find(var "s", var "t")))),var "a",var "t", tl(var "ls"), var "token"])
+          (if(exists(var "s",var "a"))
+             (apply "run" [var "d",var "d",var "a",var "t", var "ls",prim add[var "token",snd(find(var "s",var "a"))]])
+             (exception)))
+       (if(exists(var "s",var "a"))
+          (apply "run" [var "d",var "d",var "a",var "t", var "ls",prim add[var "token",snd(find(var "s",var "a"))]])
+          (exception)))
+)
+],
+  apply "run" [
+   const(ival 1),
+   const(ival 1),
+   const(tval[pval(ival 2,cval "A");pval(ival 3,cval "B");pval(ival 4,cval "BA");pval(ival 5,cval "SPACE")]),
+   const(tval[pval(ival 1,tval[pval(cval "a",ival 2);pval(cval "b",ival 3);pval(cval "_",ival 5)]);
+              pval(ival 3,tval[pval(cval "a",ival 4)]);
+              pval(ival 5,tval[pval(cval "_",ival 5)])
+              ]),
+   var "ls",
+   var "token"
+
+  ]
+)

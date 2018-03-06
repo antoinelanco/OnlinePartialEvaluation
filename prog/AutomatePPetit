@@ -1,0 +1,30 @@
+(
+[
+"run",
+(
+["d","s","a","t","ls","acc"],
+  if(prim equal [length(var "ls"), const(ival 0)])
+    (if(exists(var "s",var "a"))
+       (prim add[var "acc",snd(find(var "s",var "a"))])
+       (exception))
+    (if(exists(var "s", var "t"))
+       (if(exists(hd(var "ls"),snd(find(var "s", var "t"))))
+          (apply "run" [var "d",snd(find(hd(var "ls"),snd(find(var "s", var "t")))),var "a",var "t", tl(var "ls"), var "acc"])
+          (if(exists(var "s",var "a"))
+             (apply "run" [var "d",var "d",var "a",var "t", var "ls",prim add[var "acc",snd(find(var "s",var "a"))]])
+             (exception)))
+       (if(exists(var "s",var "a"))
+          (apply "run" [var "d",var "d",var "a",var "t", var "ls",prim add[var "acc",snd(find(var "s",var "a"))]])
+          (exception)))
+)
+],
+  apply "run" [
+   const(ival 1),
+   const(ival 1),
+   const(tval[pval(ival 1,cval "eof");pval(ival 2,cval "a");pval(ival 3,cval "b");pval(ival 4,cval "ba")]),
+   const(tval[pval(ival 1,tval[pval(cval "a",ival 2);pval(cval "b",ival 3);pval(cval "_",ival 1)]);pval(ival 3,tval[pval(cval "a",ival 4)])]),
+   const(cval "aa_baba_"),
+   const(tval[])
+
+  ]
+)

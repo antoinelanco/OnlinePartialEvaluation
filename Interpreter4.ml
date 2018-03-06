@@ -3,6 +3,8 @@ open SourceAst
 module Env = Map.Make(String)
 type env = expr Env.t
 
+module VarSet = Set.Make(String)
+
 let rec eval p = (* Prog -> Prog *)
   let (fdefs,main) = p in
   eval' fdefs main Env.empty Func_Tbl.empty
@@ -53,28 +55,26 @@ and eval' fdefs main env state = (*Eval*)
          | _ ->
            let (fd1,ma1) = eval' fdefs e1 env fd0 in
            let (fd2,ma2) = eval' fdefs e2 env fd1 in
-           (fd2,If(ma0,ma1,ma2)))
+           if ma1 = ma2
+           then (fd2,ma1)
+           else (fd2,If(ma0,ma1,ma2)))
 
       | Apply(s,es) ->
-
         let (ss,body) = Func_Tbl.find s fdefs in
 
-        let rs = List.fold_left
-            (fun acc e ->
-               let (acc_fd,acc_ma) = acc in
+        let (rs_fd,rs_ma) = List.fold_left
+            (fun (acc_fd,acc_ma) e ->
                let (fd,ma) = eval' fdefs e env acc_fd in
                (fd,acc_ma@[ma]) ) (state,[]) es
         in
 
-        let (rs_fd,rs_ma) = rs in
         let z = List.fold_left2
-            (fun acc str ee ->
-               Env.add str ee acc)
+            (fun acc str ee -> Env.add str ee acc)
             Env.empty ss rs_ma
         in
 
-        let sas = Env.filter(fun s r -> if isVal r then true else false) z in
-        let das = Env.filter(fun s r -> if isVal r then false else true) z in
+        let sas = Env.filter(fun s r -> isVal r) z in
+        let das = Env.filter(fun s r -> not (isVal r)) z in
 
         ifdas s sas das rs_fd fdefs body
 
@@ -83,6 +83,7 @@ and eval' fdefs main env state = (*Eval*)
         if isVal ma0
         then (match ma0 with
             | Const(TVal n) -> (fd0,Const(TVal (List.tl n)))
+            | Const(CVal n) -> (fd0,Const(CVal (String.sub n 1 ((String.length n)-1))))
             | _ -> failwith "tl 0nly with TVal")
 
         else (fd0,TL(ma0))
@@ -92,6 +93,7 @@ and eval' fdefs main env state = (*Eval*)
         if isVal ma0
         then (match ma0 with
             | Const(TVal n) -> (fd0,Const(List.hd n))
+            | Const(CVal n) -> (fd0,Const(CVal (String.sub n 0 1)))
             | _ -> failwith "hd 0nly with TVal")
 
         else (fd0,HD(ma0))
@@ -101,6 +103,7 @@ and eval' fdefs main env state = (*Eval*)
         if isVal ma0
         then (match ma0 with
             | Const(TVal n) -> (fd0,Const(IVal (List.length n)))
+            | Const(CVal n) -> (fd0,Const(IVal (String.length n)))
             | _ -> failwith "Length 0nly with TVal")
 
         else (fd0,Length(ma0))
@@ -147,12 +150,13 @@ and eval' fdefs main env state = (*Eval*)
            (match ma2 with
             | Const(TVal n) ->
               let cases = List.fold_left (fun acc i -> acc@[(gFirst i,Const(BVal true))] ) [] n in
-              (fd2,Switch(ma1,cases,Const(BVal false)))
+              eval' fdefs (Switch(ma1,cases,Const(BVal false))) env fd2
             | _ -> failwith "arg 2 0f exists need t0 be a TVal")
 
          | _,_ -> (fd2,Exists(ma1,ma2)))
 
       | Find(e1,e2) ->
+
         let (fd1,ma1) = eval' fdefs e1 env state in
         let (fd2,ma2) = eval' fdefs e2 env fd1 in
 
@@ -171,32 +175,39 @@ and eval' fdefs main env state = (*Eval*)
            (match ma2 with
             | Const(TVal n) ->
               let cases = List.fold_left (fun acc i -> acc@[(gFirst i,Const(i))] ) [] n in
-              (fd2,Switch(ma1,cases,Exception))
+              eval' fdefs (Switch(ma1,cases,Exception)) env fd2
             | _ -> failwith "arg 2 0f find need t0 be a TVal")
 
          |_,_ -> (fd2,Find(ma1,ma2)) )
 
       | Switch(e1,es,e2) ->
         let (fd1,ma1) = eval' fdefs e1 env state in
-
         if isVal ma1
+        (* Si ma1 est une constante on fais l'evaluation classique *)
         then
           match List.assoc_opt (getVal ma1) es with
           | Some n -> eval' fdefs n env fd1
           | None -> eval' fdefs e2 env fd1
-
-        else
-          let (new_state,new_es) = List.fold_left
-              (fun acc (e1,e2) ->
-                 let (acc_fd,acc_ma) = acc in
-                 let (fd2,ma2) = eval' fdefs e2 env acc_fd in
-                 (fd2,acc_ma@[(e1,ma2)]))
-              (state,[]) es
-          in
-          let (new_state,new_e2) = eval' fdefs e2 env new_state in
-          (new_state,Switch(ma1,new_es,new_e2))
-
-
+        else (* Sinon *)
+          (match Env.find_opt (print_expr ma1) env with
+           | Some n ->
+             (* Si l'expretion qu'il y a dans le switch a deja etes vu -> resoudre *)
+             (match List.assoc_opt (getVal n) es with
+              | Some i -> eval' fdefs i env fd1
+              | None -> eval' fdefs e2 env fd1)
+           | None ->
+             (* Sinon reconstruire le switch en ajoutant dans l'env des case
+                la const corespondant a l'exp du switch (pour les switch en cascade)*)
+             let (new_state,new_es) = List.fold_left
+                 (fun acc (i1,i2) ->
+                    let (acc_fd,acc_ma) = acc in
+                    let (fd2,ma2) = eval' fdefs i2 (Env.add (print_expr ma1) (Const i1) env) acc_fd in
+                    (fd2,acc_ma@[(i1,ma2)]))
+                 (state,[]) es
+             in
+             let (new_state,new_e2) = eval' fdefs e2 env new_state in
+             (new_state,Switch(ma1,new_es,new_e2))
+          )
     end
 
 and env_string env =
@@ -234,12 +245,7 @@ and applyTransfo elemfind k s sas das rs_fd fdefs body =
     let (a,b) = ifdas s new_sas1 new_das1 a1 fdefs body in
     let (c,d) = ifdas s new_sas2 new_das2 a2 fdefs body in
 
-
-    (match ifExpProf b,ifExpProf d with
-     | true,true -> rs_fd,Exception
-     | false,true -> a,If(e1,b,Exception)
-     | true,false -> c,If(e1,Exception,d)
-     | false,false -> (Env.merge merge_vars a c),If(e1,b,d) )
+    eval' fdefs (If(e1,b,d)) sas (Env.merge merge_vars a c)
 
 
   | Switch(e1,es,e2) ->
@@ -254,11 +260,8 @@ and applyTransfo elemfind k s sas das rs_fd fdefs body =
         then (e,acc@[(v1,Exception)])
         else (a,acc@[(v1,b)])
 
-
       )
         (rs_fd,[]) es in
-
-
 
     let (a1,b1) = eval' fdefs (bef e2) sas new_env in
     let (new_sas1,new_das1) = if (isVal(b1)) then (Env.add k b1 sas,new_das) else (sas,Env.add k b1 new_das) in
@@ -267,7 +270,7 @@ and applyTransfo elemfind k s sas das rs_fd fdefs body =
     then (new_env,Switch(e1,new_es,Exception))
     else (a,Switch(e1,new_es,b))
 
-  | _ -> failwith "forcement un if"
+  | _ -> failwith "forcement un if/switch"
 
 and newApply s sas das state fdefs body =
   let s' = s^(env_string sas) in
@@ -278,6 +281,7 @@ and newApply s sas das state fdefs body =
       let n_m = Func_Tbl.add s' ([],Const(IVal(0))) state in
       let (e'_fd,e'_ma) = eval' fdefs body sas n_m in
       let new_das = Env.fold (fun s _ acc -> acc@[s] ) das [] in
+      (* VarSet.iter (fun i -> Printf.printf "%s," i) (listOfVar e'_ma); *)
       Func_Tbl.add s' (new_das,e'_ma) e'_fd
   in
 
@@ -295,6 +299,7 @@ and getBeforT exp_r =
     | If (e1,e2,e3) -> (acc,If(e1,e2,e3))
     | Switch(e1,es,e2) -> (acc,Switch(e1,es,e2))
     | Const _ | Var _ -> failwith "getBeforT 0nly with if or switch"
+    | Prim _ -> failwith "a faire prim"
     | n -> Printf.printf "%s" (print_expr n); failwith "a faire"
   in
   aux (fun x -> x) exp_r
@@ -309,14 +314,9 @@ and findif expr_list =
 and existsif = function
   | Switch _ -> true
   | If _ -> true
-  | Prim(_,es) -> List.exists(fun i -> existsif i ) es
-  | Apply(_,es) -> List.exists(fun i -> existsif i ) es
-  | TL(e) -> existsif e
-  | HD(e) -> existsif e
-  | Length(e) -> existsif e
-  | Fst(e) -> existsif e
-  | Snd(e) -> existsif e
-  | IsPair(e) -> existsif e
+  (* | Prim(_,es) -> List.exists(fun i -> existsif i ) es *)
+  (* | Apply(_,es) -> List.exists(fun i -> existsif i ) es *)
+  | TL(e) | HD(e) | Length(e) | Fst(e) | Snd(e) | IsPair(e) -> existsif e
   | _ -> false
 
 and prim o rs =
@@ -324,14 +324,19 @@ and prim o rs =
   let el1 = List.hd rs in
   let el2 = List.hd (List.tl rs) in
   match o,el1,el2 with
-  | Add,IVal(e1),IVal(e2)  -> IVal(e1+e2)
-  | Add,TVal(e1),TVal(e2)  -> TVal(e1@e2)
-  | Mult,IVal(e1),IVal(e2) -> IVal(e1*e2)
-  | Sub,IVal(e1),IVal(e2)  -> IVal(e1-e2)
-  | Eq,IVal(e1),IVal(e2)   -> BVal (e1 == e2)
-  | Eq,BVal(e1),BVal(e2)   -> BVal (e1 == e2)
-  | Eq,TVal(e1),TVal(e2)   -> BVal (e1 = e2)
-  | _ -> failwith "Err0r match bin0p"
+  | Add,IVal(e1),IVal(e2)    -> IVal(e1+e2)
+  | Add,TVal(e1),TVal(e2)    -> TVal(e1@e2)
+  | Add,TVal(e1),IVal(e2)    -> TVal(e1@[IVal(e2)])
+  | Add,TVal(e1),BVal(e2)    -> TVal(e1@[BVal(e2)])
+  | Add,TVal(e1),CVal(e2)    -> TVal(e1@[CVal(e2)])
+  | Add,TVal(e1),PVal(e2,e3) -> TVal(e1@[PVal(e2,e3)])
+  | Mult,IVal(e1),IVal(e2)   -> IVal(e1*e2)
+  | Sub,IVal(e1),IVal(e2)    -> IVal(e1-e2)
+  | Eq,IVal(e1),IVal(e2)     -> BVal (e1 == e2)
+  | Eq,BVal(e1),BVal(e2)     -> BVal (e1 == e2)
+  | Eq,TVal(e1),TVal(e2)     -> BVal (e1 = e2)
+  | Eq,CVal(e1),CVal(e2)     -> BVal (e1 = e2)
+  | e1,e2,e3 -> Printf.printf "%s,%s,%s" (print_op e1) (print_val e2) (print_val e3);failwith "Err0r match bin0p"
 
 and ifExp = function
   | Exception -> true
@@ -339,19 +344,24 @@ and ifExp = function
 
 and ifExpProf = function
   | Const _ | Var _ -> false
-  | Prim(_,es) -> List.exists(fun i -> ifExpProf i ) es
-  | Apply(_,es) -> List.exists(fun i -> ifExpProf i ) es
-  | If (e1,e2,e3) -> ifExpProf e1 || (ifExpProf e2 && ifExpProf e3)
-  | Find (e1,e2) -> ifExpProf e1 || ifExpProf e2
-  | Exists (e1,e2) -> ifExpProf e1 || ifExpProf e2
-  | TL(e) -> ifExpProf e
-  | HD(e) -> ifExpProf e
-  | Length(e) -> ifExpProf e
-  | Fst(e) -> ifExpProf e
-  | Snd(e) -> ifExpProf e
-  | IsPair(e) -> ifExpProf e
-  | Switch(e1,_,_) -> ifExpProf e1
-  | Exception -> true
+  | Exception       -> true
+  | Prim(_,es) | Apply(_,es) -> List.exists(fun i -> ifExpProf i ) es
+  | If (e1,e2,e3)   -> ifExpProf e1 || (ifExpProf e2 && ifExpProf e3)
+  | Find (e1,e2) | Exists (e1,e2)  -> ifExpProf e1 || ifExpProf e2
+  | TL(e) | HD(e) | Length(e) | Fst(e) | Snd(e) | IsPair(e) -> ifExpProf e
+  | Switch(e1,_,_)  -> ifExpProf e1
+
+and listOfVar e =
+  let rec aux acc = function
+    | Var n -> VarSet.add n acc
+    | TL(e) | HD(e) | Length(e) | Fst(e) | Snd(e) | IsPair(e) -> aux acc e
+    | Const _ | Exception -> acc
+    | Find (e1,e2) | Exists (e1,e2) -> VarSet.union (aux acc e1) (aux acc e2)
+    | If (e1,e2,e3) -> VarSet.union (aux acc e3) (VarSet.union (aux acc e1) (aux acc e2))
+    | Apply(_,es) | Prim(_,es) -> List.fold_left (fun ac i -> VarSet.union (aux ac i) ac ) acc es
+    | Switch(e1,e2,e3) -> List.fold_left ( fun ac (_,i) -> VarSet.union (aux ac i) ac ) (VarSet.union (aux acc e1) (aux acc e3)) e2
+  in
+  aux VarSet.empty e
 
 and ifExpEnv env =
   Env.exists (fun k a -> if ifExpProf a then true else false ) env

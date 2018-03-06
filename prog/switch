@@ -1,5 +1,5 @@
 ([],
-if(exists(var "l",const(tval[ival 1;ival 2])))
-(find(var "l",const(tval[ival 1;ival 2])))
+if(exists(tl(var "l"),const(tval[ival 1;ival 2])))
+(find(tl(var "l"),const(tval[ival 1;ival 2])))
 (exception)
 )

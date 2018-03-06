@@ -1,1 +1,10 @@
-([],apply "funfind" [var "x", const(tval[ival 1;ival 2])])
+([],
+
+
+if(exists(var "x", const(tval[pval(ival 1,cval "A");pval(ival 2,cval "B")])))
+(find(var "x", const(tval[pval(ival 1,cval "A");pval(ival 2,cval "B")])))
+(const(bval false))
+
+
+
+)
