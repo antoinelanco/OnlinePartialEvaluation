@@ -1,6 +1,9 @@
 open SourceAst
 
-module Env = Map.Make(String)
+
+module Env = Map.Make(struct type t = expr let compare = compare end)
+
+(* module Env = Map.Make(String) *)
 type env = expr Env.t
 
 module VarSet = Set.Make(String)
@@ -20,7 +23,7 @@ and eval' fdefs main env state = (*Eval*)
       | Const(v)   -> (state,Const(v))
 
       | Var(s)     ->
-        let v = Env.find_opt s env in
+        let v = Env.find_opt main env in
         (match v with
          | Some n -> (state,n)
          | None -> (state,Var(s)))
@@ -69,7 +72,7 @@ and eval' fdefs main env state = (*Eval*)
         in
 
         let z = List.fold_left2
-            (fun acc str ee -> Env.add str ee acc)
+            (fun acc str ee -> Env.add (Var(str)) ee acc)
             Env.empty ss rs_ma
         in
 
@@ -189,7 +192,7 @@ and eval' fdefs main env state = (*Eval*)
           | Some n -> eval' fdefs n env fd1
           | None -> eval' fdefs e2 env fd1
         else (* Sinon *)
-          (match Env.find_opt (print_expr ma1) env with
+          (match Env.find_opt ma1 env with
            | Some n ->
              (* Si l'expretion qu'il y a dans le switch a deja etes vu -> resoudre *)
              (match List.assoc_opt (getVal n) es with
@@ -201,7 +204,7 @@ and eval' fdefs main env state = (*Eval*)
              let (new_state,new_es) = List.fold_left
                  (fun acc (i1,i2) ->
                     let (acc_fd,acc_ma) = acc in
-                    let (fd2,ma2) = eval' fdefs i2 (Env.add (print_expr ma1) (Const i1) env) acc_fd in
+                    let (fd2,ma2) = eval' fdefs i2 (Env.add ma1 (Const i1) env) acc_fd in
                     (fd2,acc_ma@[(i1,ma2)]))
                  (state,[]) es
              in
@@ -212,7 +215,7 @@ and eval' fdefs main env state = (*Eval*)
 
 and env_string env =
   let a = Env.fold(fun i e acc ->
-      Printf.sprintf "%s_%s:%s" acc i (print_expr e))
+      Printf.sprintf "%s_%s:%s" acc (print_expr i) (print_expr e))
       env "" in
   Printf.sprintf "_%s" (string_of_int (Hashtbl.hash a))
 
@@ -245,7 +248,7 @@ and applyTransfo elemfind k s sas das rs_fd fdefs body =
     let (a,b) = ifdas s new_sas1 new_das1 a1 fdefs body in
     let (c,d) = ifdas s new_sas2 new_das2 a2 fdefs body in
 
-    eval' fdefs (If(e1,b,d)) sas (Env.merge merge_vars a c)
+    eval' fdefs (If(e1,b,d)) sas (Func_Tbl.merge merge_vars a c)
 
 
   | Switch(e1,es,e2) ->
@@ -274,19 +277,28 @@ and applyTransfo elemfind k s sas das rs_fd fdefs body =
 
 and newApply s sas das state fdefs body =
   let s' = s^(env_string sas) in
-  let new_state =
+
+
+
+  begin
     match (Func_Tbl.find_opt s' state) with
-    | Some _ -> state
+    | Some _ ->
+      let param = Env.fold (fun i e acc -> acc@[e]) das [] in
+      (state,Apply(s',param))
+
     | None ->
       let n_m = Func_Tbl.add s' ([],Const(IVal(0))) state in
       let (e'_fd,e'_ma) = eval' fdefs body sas n_m in
-      let new_das = Env.fold (fun s _ acc -> acc@[s] ) das [] in
-      (* VarSet.iter (fun i -> Printf.printf "%s," i) (listOfVar e'_ma); *)
-      Func_Tbl.add s' (new_das,e'_ma) e'_fd
-  in
+      if existsif e'_ma
+      then
+        let new_das = Env.fold (fun s _ acc -> acc@[s] ) das [] in
+        let state = Func_Tbl.add s' (new_das,e'_ma) e'_fd in
+        let param = Env.fold (fun i e acc -> acc@[e]) das [] in
+        (state,Apply(s',param))
+      else
+        eval' fdefs e'_ma das state
 
-  let param = Env.fold (fun i e acc -> acc@[e]) das [] in
-  (new_state,Apply(s',param))
+  end
 
 and getBeforT exp_r =
   let rec aux acc = function
@@ -314,9 +326,9 @@ and findif expr_list =
 and existsif = function
   | Switch _ -> true
   | If _ -> true
+  | TL(e) | HD(e) | Length(e) | Fst(e) | Snd(e) | IsPair(e) -> existsif e
   (* | Prim(_,es) -> List.exists(fun i -> existsif i ) es *)
   (* | Apply(_,es) -> List.exists(fun i -> existsif i ) es *)
-  | TL(e) | HD(e) | Length(e) | Fst(e) | Snd(e) | IsPair(e) -> existsif e
   | _ -> false
 
 and prim o rs =

@@ -48,7 +48,7 @@ let rec print_prog p =
 and print_fdef fd = Func_Tbl.fold (fun key el acc ->
     let (arg_list,exp) = el in
     let args_lists =
-      let tmp = List.fold_left(fun ac i -> sprintf "%s,%s" ac i) "" arg_list in
+      let tmp = List.fold_left(fun ac i -> sprintf "%s,%s" ac (print_expr i )) "" arg_list in
       let taille = String.length tmp in
       if taille != 0
       then String.sub tmp 1 (taille-1)
