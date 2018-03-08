@@ -38,10 +38,10 @@
               pval(ival 4,tval[pval(cval "c",ival 5)])
               ]),
    const(cval "abb"),
-   var "token",
+   const(tval []),
    var "last",
    var "rls",
-   var "stack"
+   const(bval false)
 
 
   ]

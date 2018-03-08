@@ -16,7 +16,7 @@ and eval' fdefs main env state = (*Eval*)
   if ifExpProf main
   then (state,Exception)
   else
-    begin
+    let res_match =
       match main with
       | Exception   -> (state,Exception)
 
@@ -186,32 +186,26 @@ and eval' fdefs main env state = (*Eval*)
       | Switch(e1,es,e2) ->
         let (fd1,ma1) = eval' fdefs e1 env state in
         if isVal ma1
-        (* Si ma1 est une constante on fais l'evaluation classique *)
         then
           match List.assoc_opt (getVal ma1) es with
           | Some n -> eval' fdefs n env fd1
           | None -> eval' fdefs e2 env fd1
-        else (* Sinon *)
-          (match Env.find_opt ma1 env with
-           | Some n ->
-             (* Si l'expretion qu'il y a dans le switch a deja etes vu -> resoudre *)
-             (match List.assoc_opt (getVal n) es with
-              | Some i -> eval' fdefs i env fd1
-              | None -> eval' fdefs e2 env fd1)
-           | None ->
-             (* Sinon reconstruire le switch en ajoutant dans l'env des case
-                la const corespondant a l'exp du switch (pour les switch en cascade)*)
-             let (new_state,new_es) = List.fold_left
-                 (fun acc (i1,i2) ->
-                    let (acc_fd,acc_ma) = acc in
-                    let (fd2,ma2) = eval' fdefs i2 (Env.add ma1 (Const i1) env) acc_fd in
-                    (fd2,acc_ma@[(i1,ma2)]))
-                 (state,[]) es
-             in
-             let (new_state,new_e2) = eval' fdefs e2 env new_state in
-             (new_state,Switch(ma1,new_es,new_e2))
-          )
-    end
+        else
+          let (new_state,new_es) = List.fold_left
+              (fun acc (i1,i2) ->
+                 let (acc_fd,acc_ma) = acc in
+                 let (fd2,ma2) = eval' fdefs i2 (Env.add ma1 (Const i1) env) acc_fd in
+                 (fd2,acc_ma@[(i1,ma2)]))
+              (state,[]) es
+          in
+          let (new_state,new_e2) = eval' fdefs e2 env new_state in
+          (new_state,Switch(ma1,new_es,new_e2))
+    in
+
+    let (e,m) = res_match in
+    match Env.find_opt m env with
+    | Some n -> (e,n)
+    | None -> res_match
 
 and env_string env =
   let a = Env.fold(fun i e acc ->
