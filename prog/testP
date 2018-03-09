@@ -1,8 +1,4 @@
 (
-[
-"exp",
-(["x","n"],
-prim mul [var "x",var "n"])
-],
-  apply "exp" [const (ival 10),var "x"]
+[],
+  prim add [var "a", switch (var "a") [(ival 1,const(ival 2))] (var "a")  ]
 )

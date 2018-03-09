@@ -6,8 +6,6 @@ module Env = Map.Make(struct type t = expr let compare = compare end)
 (* module Env = Map.Make(String) *)
 type env = expr Env.t
 
-module VarSet = Set.Make(String)
-
 let rec eval p = (* Prog -> Prog *)
   let (fdefs,main) = p in
   eval' fdefs main Env.empty Func_Tbl.empty
@@ -39,7 +37,15 @@ and eval' fdefs main env state = (*Eval*)
         let (fd,ma) = rs in
         if (allIsVal ma)
         then (fd,Const(prim o (mapVal ma)))
-        else (fd,Prim(o,ma))
+        else
+
+          let (_,ar) = List.fold_left (fun (num,acc) elem -> (num+1,Env.add (Const(IVal num)) elem acc) ) (0,Env.empty) ma in
+          begin
+            match findif ar with
+            | Some (elemfind,k) -> primTransfo elemfind k ar o env fdefs fd
+            | None ->
+              (fd,Prim(o,ma))
+          end
 
       | If(e0,e1,e2) ->
         let (fd0,ma0) = eval' fdefs e0 env state in
@@ -80,63 +86,6 @@ and eval' fdefs main env state = (*Eval*)
         let das = Env.filter(fun s r -> not (isVal r)) z in
 
         ifdas s sas das rs_fd fdefs body
-
-      | TL(e) ->
-        let (fd0,ma0) = eval' fdefs e env state in
-        if isVal ma0
-        then (match ma0 with
-            | Const(TVal n) -> (fd0,Const(TVal (List.tl n)))
-            | Const(CVal n) -> (fd0,Const(CVal (String.sub n 1 ((String.length n)-1))))
-            | _ -> failwith "tl 0nly with TVal")
-
-        else (fd0,TL(ma0))
-
-      | HD(e) ->
-        let (fd0,ma0) = eval' fdefs e env state in
-        if isVal ma0
-        then (match ma0 with
-            | Const(TVal n) -> (fd0,Const(List.hd n))
-            | Const(CVal n) -> (fd0,Const(CVal (String.sub n 0 1)))
-            | _ -> failwith "hd 0nly with TVal")
-
-        else (fd0,HD(ma0))
-
-      | Length(e) ->
-        let (fd0,ma0) = eval' fdefs e env state in
-        if isVal ma0
-        then (match ma0 with
-            | Const(TVal n) -> (fd0,Const(IVal (List.length n)))
-            | Const(CVal n) -> (fd0,Const(IVal (String.length n)))
-            | _ -> failwith "Length 0nly with TVal")
-
-        else (fd0,Length(ma0))
-
-      | Fst(e) ->
-        let (fd0,ma0) = eval' fdefs e env state in
-        if isVal ma0
-        then (match ma0 with
-            | Const(PVal(n1,n2)) -> (fd0,Const(n1))
-            | _ -> failwith "fst 0nly with PVal")
-
-        else (fd0,Fst(ma0))
-
-      | Snd(e) ->
-        let (fd0,ma0) = eval' fdefs e env state in
-        if isVal ma0
-        then (match ma0 with
-            | Const(PVal(n1,n2)) -> (fd0,Const(n2))
-            | _ -> failwith "snd 0nly with PVal")
-
-        else (fd0,Snd(ma0))
-
-      | IsPair(e) ->
-        let (fd0,ma0) = eval' fdefs e env state in
-        if isVal ma0
-        then (match ma0 with
-            | Const(PVal _) -> (fd0,Const(BVal true))
-            | _ -> (fd0,Const(BVal false)))
-
-        else (fd0,IsPair(ma0))
 
       | Exists(e1,e2) ->
         let (fd1,ma1) = eval' fdefs e1 env state in
@@ -224,6 +173,42 @@ and ifdas s sas das state fdefs body =
       | None -> newApply s sas das state fdefs body
     end
 
+and primTransfo elemfind k ar o env fdefs fd =
+  let (bef,aft) = getBeforT elemfind in
+  match aft with
+  | If (e1,e2,e3) ->
+    let (a1,b1) = eval' fdefs (bef e2) env fd in
+    let (a2,b2) = eval' fdefs (bef e3) env fd in
+
+    let new_ar1 = Env.add k b1 ar in
+    let new_ar2 = Env.add k b2 ar in
+
+    let new_es1 = Env.fold (fun _ e acc -> acc@[e]) new_ar1 [] in
+    let new_es2 = Env.fold (fun _ e acc -> acc@[e]) new_ar2 [] in
+
+    eval' fdefs (If(e1,Prim(o,new_es1),Prim(o,new_es2))) env (Func_Tbl.merge merge_vars a1 a2)
+
+  | Switch(e1,es,e2) ->
+
+    let (new_env,new_es) = List.fold_left (fun (e,acc) (v1,ee) ->
+
+        let (a1,b1) = eval' fdefs (bef ee) env e in
+        let new_ar = Env.add k b1 ar in
+        let new_es = Env.fold (fun _ e acc -> acc@[e]) new_ar [] in
+
+
+        (a1,acc@[(v1,Prim(o,new_es))])
+
+      )
+        (fd,[]) es in
+
+    let (a1,b1) = eval' fdefs (bef e2) env fd in
+    let new_ar = Env.add k b1 ar in
+    let new_ess = Env.fold (fun _ e acc -> acc@[e]) new_ar [] in
+    eval' fdefs (Switch(e1,new_es,Prim(o,new_ess))) env fd
+
+  | _ -> failwith "forcement un if/switch"
+
 and applyTransfo elemfind k s sas das rs_fd fdefs body =
 
   let (bef,aft) = getBeforT elemfind in
@@ -237,7 +222,6 @@ and applyTransfo elemfind k s sas das rs_fd fdefs body =
     let new_das = Env.remove k das in
     let (new_sas1,new_das1) = if (isVal(b1)) then (Env.add k b1 sas,new_das) else (sas,Env.add k b1 new_das) in
     let (new_sas2,new_das2) = if (isVal(b2)) then (Env.add k b2 sas,new_das) else (sas,Env.add k b2 new_das) in
-
 
     let (a,b) = ifdas s new_sas1 new_das1 a1 fdefs body in
     let (c,d) = ifdas s new_sas2 new_das2 a2 fdefs body in
@@ -272,8 +256,6 @@ and applyTransfo elemfind k s sas das rs_fd fdefs body =
 and newApply s sas das state fdefs body =
   let s' = s^(env_string sas) in
 
-
-
   begin
     match (Func_Tbl.find_opt s' state) with
     | Some _ ->
@@ -296,17 +278,10 @@ and newApply s sas das state fdefs body =
 
 and getBeforT exp_r =
   let rec aux acc = function
-    | Snd e -> aux (fun x -> acc (Snd x)) e
-    | Fst e -> aux (fun x -> acc (Fst x)) e
-    | IsPair e -> aux (fun x -> acc (IsPair x)) e
-    | TL  e -> aux (fun x -> acc (TL x)) e
-    | HD  e -> aux (fun x -> acc (HD x)) e
-    | Length e -> aux (fun x -> acc (Length x)) e
     | If (e1,e2,e3) -> (acc,If(e1,e2,e3))
     | Switch(e1,es,e2) -> (acc,Switch(e1,es,e2))
     | Const _ | Var _ -> failwith "getBeforT 0nly with if or switch"
-    | Prim _ -> failwith "a faire prim"
-    | n -> Printf.printf "%s" (print_expr n); failwith "a faire"
+    | _ -> failwith "ca peut pas arriver"
   in
   aux (fun x -> x) exp_r
 
@@ -318,31 +293,49 @@ and findif expr_list =
     expr_list None
 
 and existsif = function
-  | Switch _ -> true
-  | If _ -> true
-  | TL(e) | HD(e) | Length(e) | Fst(e) | Snd(e) | IsPair(e) -> existsif e
-  (* | Prim(_,es) -> List.exists(fun i -> existsif i ) es *)
-  (* | Apply(_,es) -> List.exists(fun i -> existsif i ) es *)
+  | Switch _ | If _ -> true
+  | Prim(_,es) -> List.exists(fun i -> existsif i ) es
   | _ -> false
 
 and prim o rs =
-  if List.length rs <> 2 then failwith "Bin0p need 0nly 2 arg";
-  let el1 = List.hd rs in
-  let el2 = List.hd (List.tl rs) in
-  match o,el1,el2 with
-  | Add,IVal(e1),IVal(e2)    -> IVal(e1+e2)
-  | Add,TVal(e1),TVal(e2)    -> TVal(e1@e2)
-  | Add,TVal(e1),IVal(e2)    -> TVal(e1@[IVal(e2)])
-  | Add,TVal(e1),BVal(e2)    -> TVal(e1@[BVal(e2)])
-  | Add,TVal(e1),CVal(e2)    -> TVal(e1@[CVal(e2)])
-  | Add,TVal(e1),PVal(e2,e3) -> TVal(e1@[PVal(e2,e3)])
-  | Mult,IVal(e1),IVal(e2)   -> IVal(e1*e2)
-  | Sub,IVal(e1),IVal(e2)    -> IVal(e1-e2)
-  | Eq,IVal(e1),IVal(e2)     -> BVal (e1 == e2)
-  | Eq,BVal(e1),BVal(e2)     -> BVal (e1 == e2)
-  | Eq,TVal(e1),TVal(e2)     -> BVal (e1 = e2)
-  | Eq,CVal(e1),CVal(e2)     -> BVal (e1 = e2)
-  | e1,e2,e3 -> Printf.printf "%s,%s,%s" (print_op e1) (print_val e2) (print_val e3);failwith "Err0r match bin0p"
+  match List.length rs with
+  | 1 ->
+    begin
+      let el1 = List.hd rs in
+      match o,el1 with
+      | TL,CVal(e)       -> CVal (String.sub e 1 ((String.length e)-1))
+      | TL,TVal(e)       -> TVal (List.tl e)
+      | HD,CVal(e)       -> CVal (String.sub e 0 1)
+      | HD,TVal(e)       -> List.hd e
+      | Length,CVal(e)   -> IVal (String.length e)
+      | Length,TVal(e)   -> IVal (List.length e)
+      | Fst,PVal(e1,_)   -> e1
+      | Snd,PVal(_,e2)   -> e2
+      | IsPair,PVal(_,_) -> BVal true
+      | IsPair,_         -> BVal false
+      | e1,e2 -> Printf.printf "%s,%s" (print_op e1) (print_val e2);failwith "Err0r match bin0p"
+
+    end
+  | 2 ->
+    begin
+      let el1 = List.hd rs in
+      let el2 = List.hd (List.tl rs) in
+      match o,el1,el2 with
+      | Add,IVal(e1),IVal(e2)    -> IVal(e1+e2)
+      | Add,TVal(e1),TVal(e2)    -> TVal(e1@e2)
+      | Add,TVal(e1),IVal(e2)    -> TVal(e1@[IVal(e2)])
+      | Add,TVal(e1),BVal(e2)    -> TVal(e1@[BVal(e2)])
+      | Add,TVal(e1),CVal(e2)    -> TVal(e1@[CVal(e2)])
+      | Add,TVal(e1),PVal(e2,e3) -> TVal(e1@[PVal(e2,e3)])
+      | Mult,IVal(e1),IVal(e2)   -> IVal(e1*e2)
+      | Sub,IVal(e1),IVal(e2)    -> IVal(e1-e2)
+      | Eq,IVal(e1),IVal(e2)     -> BVal (e1 == e2)
+      | Eq,BVal(e1),BVal(e2)     -> BVal (e1 == e2)
+      | Eq,TVal(e1),TVal(e2)     -> BVal (e1 = e2)
+      | Eq,CVal(e1),CVal(e2)     -> BVal (e1 = e2)
+      | e1,e2,e3 -> Printf.printf "%s,%s,%s" (print_op e1) (print_val e2) (print_val e3);failwith "Err0r match bin0p"
+    end
+  | _ -> failwith "Bin0p 0nly 1 or 2 arg"
 
 and ifExp = function
   | Exception -> true
@@ -354,20 +347,7 @@ and ifExpProf = function
   | Prim(_,es) | Apply(_,es) -> List.exists(fun i -> ifExpProf i ) es
   | If (e1,e2,e3)   -> ifExpProf e1 || (ifExpProf e2 && ifExpProf e3)
   | Find (e1,e2) | Exists (e1,e2)  -> ifExpProf e1 || ifExpProf e2
-  | TL(e) | HD(e) | Length(e) | Fst(e) | Snd(e) | IsPair(e) -> ifExpProf e
   | Switch(e1,_,_)  -> ifExpProf e1
-
-and listOfVar e =
-  let rec aux acc = function
-    | Var n -> VarSet.add n acc
-    | TL(e) | HD(e) | Length(e) | Fst(e) | Snd(e) | IsPair(e) -> aux acc e
-    | Const _ | Exception -> acc
-    | Find (e1,e2) | Exists (e1,e2) -> VarSet.union (aux acc e1) (aux acc e2)
-    | If (e1,e2,e3) -> VarSet.union (aux acc e3) (VarSet.union (aux acc e1) (aux acc e2))
-    | Apply(_,es) | Prim(_,es) -> List.fold_left (fun ac i -> VarSet.union (aux ac i) ac ) acc es
-    | Switch(e1,e2,e3) -> List.fold_left ( fun ac (_,i) -> VarSet.union (aux ac i) ac ) (VarSet.union (aux acc e1) (aux acc e3)) e2
-  in
-  aux VarSet.empty e
 
 and ifExpEnv env =
   Env.exists (fun k a -> if ifExpProf a then true else false ) env

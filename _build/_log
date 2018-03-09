@@ -19,20 +19,12 @@ menhir --ocamlc 'ocamlfind ocamlc -w -40' --infer Parser.mly
 ocamlfind ocamldep -modules Parser.mli > Parser.mli.depends
 # Target: Parser.cmi, tags: { byte, compile, extension:mli, file:Parser.mli, interf, ocaml, quiet }
 ocamlfind ocamlc -c -w -40 -o Parser.cmi Parser.mli
-# Target: Lib.ml.depends, tags: { extension:ml, file:Lib.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules Lib.ml > Lib.ml.depends
-# Target: PostEval.ml.depends, tags: { extension:ml, file:PostEval.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules PostEval.ml > PostEval.ml.depends
 # Target: Printer.ml.depends, tags: { extension:ml, file:Printer.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules Printer.ml > Printer.ml.depends
 # Target: Interpreter4.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Interpreter4.cmo, file:Interpreter4.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -w -40 -o Interpreter4.cmo Interpreter4.ml
 # Target: Lexer.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Lexer.cmo, file:Lexer.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -w -40 -o Lexer.cmo Lexer.ml
-# Target: Lib.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Lib.cmo, file:Lib.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -w -40 -o Lib.cmo Lib.ml
-# Target: PostEval.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:PostEval.cmo, file:PostEval.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -w -40 -o PostEval.cmo PostEval.ml
 # Target: Printer.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Printer.cmo, file:Printer.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -w -40 -o Printer.cmo Printer.ml
 # Target: Main.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Main.cmo, file:Main.ml, implem, ocaml, quiet }
@@ -47,14 +39,10 @@ ocamlfind ocamlopt -c -w -40 -o Parser.cmx Parser.ml
 ocamlfind ocamlopt -c -w -40 -o Interpreter4.cmx Interpreter4.ml
 # Target: Lexer.cmx, tags: { compile, extension:cmx, extension:ml, file:Lexer.cmx, file:Lexer.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -w -40 -o Lexer.cmx Lexer.ml
-# Target: Lib.cmx, tags: { compile, extension:cmx, extension:ml, file:Lib.cmx, file:Lib.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -w -40 -o Lib.cmx Lib.ml
-# Target: PostEval.cmx, tags: { compile, extension:cmx, extension:ml, file:PostEval.cmx, file:PostEval.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -w -40 -o PostEval.cmx PostEval.ml
 # Target: Printer.cmx, tags: { compile, extension:cmx, extension:ml, file:Printer.cmx, file:Printer.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -w -40 -o Printer.cmx Printer.ml
 # Target: Main.cmx, tags: { compile, extension:cmx, extension:ml, file:Main.cmx, file:Main.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -w -40 -o Main.cmx Main.ml
 # Target: Main.native, tags: { dont_link_with, extension:native, file:Main.native, link, native, ocaml, program, quiet }
-ocamlfind ocamlopt -linkpkg SourceAst.cmx Interpreter4.cmx Parser.cmx Lexer.cmx Lib.cmx PostEval.cmx Printer.cmx Main.cmx -o Main.native
+ocamlfind ocamlopt -linkpkg SourceAst.cmx Interpreter4.cmx Parser.cmx Lexer.cmx Printer.cmx Main.cmx -o Main.native
 # Compilation successful.

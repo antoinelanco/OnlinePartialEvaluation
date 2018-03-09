@@ -1,0 +1,48 @@
+(
+[
+"run",
+(
+["d","s","a","t","ls","token","last","rls","stack"],
+  if(prim equal [prim length [var "ls"], const(ival 0)])
+    (if(exists(var "s",var "a"))
+       (prim add[var "token",prim snd [find(var "s",var "a")]])
+       (if(var "stack")
+          (apply "run" [var "d",var "d",var "a",var "t", var "rls",prim add [var "token",var "last"],var "last",var "rls",const(bval false)])
+          (exception)))
+
+    (if(exists(var "s", var "t"))
+       (if(exists(prim hd[var "ls"],prim snd [find(var "s", var "t")]))
+          (if(exists(var "s",var "a"))
+             (apply "run" [var "d",prim snd [find(prim hd [var "ls"],prim snd [find(var "s", var "t")])],var "a",var "t", prim tl[var "ls"], var "token",prim snd[find(var "s",var "a")],var "ls",const(bval true)])
+             (apply "run" [var "d",prim snd [find(prim hd [var "ls"],prim snd [find(var "s", var "t")])],var "a",var "t", prim tl[var "ls"], var "token",var "last",var "rls",var "stack"]))
+          (if(exists(var "s",var "a"))
+             (apply "run" [var "d",var "d",var "a",var "t", var "ls",prim add[var "token",prim snd[find(var "s",var "a")]],var "last",var "rls",var "stack"])
+             (if(var "stack")
+                (apply "run" [var "d",var "d",var "a",var "t", var "rls",prim add [var "token",var "last"],var "last",var "rls",const(bval false)])
+                (exception))))
+       (if(exists(var "s",var "a"))
+          (apply "run" [var "d",var "d",var "a",var "t", var "ls",prim add[var "token",prim snd [find(var "s",var "a")]],var "last",var "rls",var "stack"])
+          (if(var "stack")
+             (apply "run" [var "d",var "d",var "a",var "t", var "rls",prim add [var "token",var "last"],var "last",var "rls",const(bval false)])
+             (exception))))
+
+)
+],
+  apply "run" [
+   const(ival 1),
+   const(ival 1),
+   const(tval[pval(ival 6,cval "B");pval(ival 3,cval "AB");pval(ival 5,cval "ABBC")]),
+   const(tval[pval(ival 1,tval[pval(cval "a",ival 2);pval(cval "b",ival 6)]);
+              pval(ival 2,tval[pval(cval "b",ival 3)]);
+              pval(ival 3,tval[pval(cval "b",ival 4)]);
+              pval(ival 4,tval[pval(cval "c",ival 5)])
+              ]),
+   var "ls",
+   var "token",
+   var "last",
+   var "rls",
+   const(bval false)
+
+
+  ]
+)

@@ -1,32 +1,5 @@
-(
-[
-"run",
-(
-["s","a","t","ls"],
-  if (prim equal [var "ls", const(tval[])] )
-     (exists(var "s",var "a"))
-     (
-     if (exists(var "s", var "t"))
-        (
-        if(exists(hd(var "ls"),snd(find(var "s", var "t"))))
-        (apply "run" [
+(["run",(["s"],var "s")],
 
-        snd(
-        find(
-        hd(var "ls"),snd(find(var "s", var "t"))
-        )
-        )
-        ,var "a",var "t", tl(var "ls")])
-        (const(bval false))
-        )
-        (const(bval false))
-     )
-)
-],
-  apply "run" [
-   const(ival 1),
-   const(tval[ival 1]),
-   const(tval[pval(ival 1,tval[pval(cval "a",ival 1); pval(cval "b",ival 1)])]),
-   const(tval[cval "a";cval "a"; cval "b"])
-  ]
-)
+
+
+apply "run" [  prim snd [find(var "s",const(tval[ival 1;ival 2]))   ]])

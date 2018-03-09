@@ -64,12 +64,12 @@ expr:
 | APPLAY; id=str BB; es=separated_list(COMMA, expr); EB { Apply(id,es) }
 | PRIM; bin=op; BB; es=separated_list(COMMA, expr); EB { Prim(bin,es) }
 | IF; BEGIN; e1=expr; END; BEGIN; e2=expr; END; BEGIN; e3=expr; END { If(e1,e2,e3) }
-| TL; BEGIN; e=expr; END { TL(e) }
+/* | TL; BEGIN; e=expr; END { TL(e) }
 | HD; BEGIN; e=expr; END { HD(e) }
 | LENGTH; BEGIN; e=expr; END { Length(e) }
 | FST; BEGIN; e=expr; END { Fst(e) }
 | SND; BEGIN; e=expr; END { Snd(e) }
-| ISPAIR; BEGIN e=expr; END { IsPair(e) }
+| ISPAIR; BEGIN e=expr; END { IsPair(e) } */
 | EXISTS; BEGIN; e1=expr; COMMA; e2=expr; END { Exists(e1,e2) }
 | FIND; BEGIN; e1=expr; COMMA; e2=expr; END { Find(e1,e2) }
 | SWITCH; BEGIN; e1=expr; END; BB; es=separated_nonempty_list(SEMI, case); EB; BEGIN; e2=expr; END { Switch (e1,es,e2) }
@@ -78,7 +78,13 @@ case:
 | BEGIN; v1=vall; COMMA; e2=expr; END { (v1,e2) }
 
 op:
-| MULT { Mult }
-| ADD  { Add }
-| SUB  { Sub }
-| EQ   { Eq }
+| MULT   { Mult }
+| ADD    { Add }
+| SUB    { Sub }
+| EQ     { Eq }
+| TL     { TL }
+| HD     { HD }
+| FST    { Fst }
+| SND    { Snd }
+| LENGTH { Length }
+| ISPAIR { IsPair }
