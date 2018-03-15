@@ -1,41 +1,36 @@
 exception Error
 
 type token = 
-  | VAR
-  | TVAL
   | TRUE
   | TL
   | SWITCH
   | SUB
   | SND
   | SEMI
-  | PVAL
-  | PRIM
   | MULT
   | LITINT of (int)
   | LENGTH
-  | IVAL
   | ISPAIR
   | IF
   | IDENT of (string)
   | HD
+  | FUN
   | FST
   | FIND
+  | FE
+  | FB
   | FALSE
   | EXISTS
   | EXCEP
   | EQ
   | EOF
   | END
+  | ELSE
   | EB
   | DCOTE
-  | CVAL
-  | CONST
   | COMMA
-  | BVAL
   | BEGIN
   | BB
-  | APPLAY
   | ADD
 
 

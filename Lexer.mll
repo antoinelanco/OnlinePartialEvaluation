@@ -10,18 +10,10 @@
     let h = Hashtbl.create 30 in
     List.iter (fun (s, k) -> Hashtbl.add h s k)
       [ "if",       IF;
-        "prim",     PRIM;
-        "apply",    APPLAY;
+        "else",     ELSE;
         "equal",    EQ;
-        "var",      VAR;
-        "const",    CONST;
-        "ival",     IVAL;
-        "bval",     BVAL;
-        "cval",     CVAL;
-        "tval",     TVAL;
         "exists",   EXISTS;
         "find",     FIND;
-        "pval",     PVAL;
         "fst",      FST;
         "snd",      SND;
         "ispair",   ISPAIR;
@@ -35,6 +27,7 @@
         "false",    FALSE;
         "exception",EXCEP;
         "switch",   SWITCH;
+        "fun",      FUN;
       ] ;
     fun s ->
       try  Hashtbl.find h s
@@ -47,7 +40,7 @@ let alpha = ['a'-'z' 'A'-'Z']
 let ident = (alpha | '_') (alpha | '_' | '\'' | digit)*
 
 rule token = parse
-  | [' ' '\t' '\r' '\n']+
+  | [' ' '\t' '\r' '\n' '|']+
       { token lexbuf }
   | ident
       { id_or_keyword (lexeme lexbuf) }
@@ -59,6 +52,10 @@ rule token = parse
       { BEGIN }
   | ")"
       { END }
+  | "{"
+      { FB }
+  | "}"
+      { FE }
   | "["
       { BB }
   | "]"

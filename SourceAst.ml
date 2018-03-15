@@ -1,4 +1,3 @@
-
 module Func_Tbl = Map.Make(String)
 
 type prog = (fdefs * expr)
@@ -38,6 +37,9 @@ and op =
   | Fst
   | Snd
   | IsPair
+
+module Env = Map.Make(struct type t = expr let compare = compare end)
+type env = expr Env.t
 
 open Printf
 

@@ -1,11 +1,6 @@
 open SourceAst
 
 
-module Env = Map.Make(struct type t = expr let compare = compare end)
-
-(* module Env = Map.Make(String) *)
-type env = expr Env.t
-
 let rec eval p = (* Prog -> Prog *)
   let (fdefs,main) = p in
   eval' fdefs main Env.empty Func_Tbl.empty
@@ -156,7 +151,7 @@ and eval' fdefs main env state = (*Eval*)
     | Some n -> (e,n)
     | None -> res_match
 
-and env_string env =
+and env_string env = (*Static parameter to Hash*)
   let a = Env.fold(fun i e acc ->
       Printf.sprintf "%s_%s:%s" acc (print_expr i) (print_expr e))
       env "" in
@@ -337,10 +332,6 @@ and prim o rs =
     end
   | _ -> failwith "Bin0p 0nly 1 or 2 arg"
 
-and ifExp = function
-  | Exception -> true
-  | _ -> false
-
 and ifExpProf = function
   | Const _ | Var _ -> false
   | Exception       -> true
@@ -356,15 +347,15 @@ and val_to_bool = function
   | Const(BVal b) -> b
   | _ -> failwith "N0t a b00lean value"
 
-and allIsVal = List.fold_left
-    (fun acc i -> match i with
-       | Const _ -> acc
-       | _ -> false ) true
+and allIsVal =
+  List.fold_left  (fun acc i -> match i with
+      | Const _ -> acc
+      | _ -> false ) true
 
-and mapVal = List.map
-    (fun i -> match i with
-       | Const n -> n
-       | _ -> failwith "C0nst 0nly")
+and mapVal =
+  List.map (fun i -> match i with
+      | Const n -> n
+      | _ -> failwith "C0nst 0nly")
 
 and isVal = function
   | Const _ -> true

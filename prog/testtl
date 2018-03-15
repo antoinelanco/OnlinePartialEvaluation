@@ -1,5 +1,8 @@
-(["run",(["s"],var "s")],
-
-
-
-apply "run" [  prim snd [find(var "s",const(tval[ival 1;ival 2]))   ]])
+fun run (s,l){
+  if(exists(s,l)){
+    snd[find(s,l)]
+  }else{
+    10
+  }
+}
+run (x,[(1,"A");(2,"N");(3,"J")])

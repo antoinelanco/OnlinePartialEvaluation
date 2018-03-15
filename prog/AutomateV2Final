@@ -1,48 +1,52 @@
-(
-[
-"run",
-(
-["d","s","a","t","ls","token","last","rls","stack"],
-  if(prim equal [prim length [var "ls"], const(ival 0)])
-    (if(exists(var "s",var "a"))
-       (prim add[var "token",prim snd [find(var "s",var "a")]])
-       (if(var "stack")
-          (apply "run" [var "d",var "d",var "a",var "t", var "rls",prim add [var "token",var "last"],var "last",var "rls",const(bval false)])
-          (exception)))
 
-    (if(exists(var "s", var "t"))
-       (if(exists(prim hd[var "ls"],prim snd [find(var "s", var "t")]))
-          (if(exists(var "s",var "a"))
-             (apply "run" [var "d",prim snd [find(prim hd [var "ls"],prim snd [find(var "s", var "t")])],var "a",var "t", prim tl[var "ls"], var "token",prim snd[find(var "s",var "a")],var "ls",const(bval true)])
-             (apply "run" [var "d",prim snd [find(prim hd [var "ls"],prim snd [find(var "s", var "t")])],var "a",var "t", prim tl[var "ls"], var "token",var "last",var "rls",var "stack"]))
-          (if(exists(var "s",var "a"))
-             (apply "run" [var "d",var "d",var "a",var "t", var "ls",prim add[var "token",prim snd[find(var "s",var "a")]],var "last",var "rls",var "stack"])
-             (if(var "stack")
-                (apply "run" [var "d",var "d",var "a",var "t", var "rls",prim add [var "token",var "last"],var "last",var "rls",const(bval false)])
-                (exception))))
-       (if(exists(var "s",var "a"))
-          (apply "run" [var "d",var "d",var "a",var "t", var "ls",prim add[var "token",prim snd [find(var "s",var "a")]],var "last",var "rls",var "stack"])
-          (if(var "stack")
-             (apply "run" [var "d",var "d",var "a",var "t", var "rls",prim add [var "token",var "last"],var "last",var "rls",const(bval false)])
-             (exception))))
+fun run (d,s,a,t,ls,token,last,rls,stack){
+  if(equal [length[ls], 0]){
+    if(exists(s,a)){
+      add[token,snd [find(s,a)]]
+    }else{
+      if(stack){
+        run (d,d,a,t,rls,add[token,last],last,rls,false)
+      }else{
+        exception
+      }
+    }
+  }else{
+    if(exists(s, t)){
+      if(exists(hd[ls],snd [find(s, t)])){
+        if(exists(s,a)){
+          run (d,snd[find(hd[ls],snd[find(s, t)])],a,t,tl[ls],token,snd[find(s,a)],ls,true)
+        }else{
+          run (d,snd[find(hd[ls],snd[find(s, t)])],a,t,tl[ls],token,last,rls,stack)
+        }
+      }else{
+        if(exists(s,a)){
+          run (d,d,a,t, ls,add[token,snd[find(s,a)]],last,rls,stack)
+        }else{
+          if(stack){
+            run (d,d,a,t, rls,add [token,last],last,rls,false)
+          }else{
+            exception
+          }
+        }
+      }
+    }else{
+      if(exists(s,a)){
+        run (d,d,a,t,ls,add[token,snd[find(s,a)]],last,rls,stack)
+      }else{
+        if(stack){
+          run (d,d,a,t,rls,add[token,last],last,rls,false)
+        }else{
+          exception
+        }
+      }
+    }
+  }
+}
 
-)
-],
-  apply "run" [
-   const(ival 1),
-   const(ival 1),
-   const(tval[pval(ival 6,cval "B");pval(ival 3,cval "AB");pval(ival 5,cval "ABBC")]),
-   const(tval[pval(ival 1,tval[pval(cval "a",ival 2);pval(cval "b",ival 6)]);
-              pval(ival 2,tval[pval(cval "b",ival 3)]);
-              pval(ival 3,tval[pval(cval "b",ival 4)]);
-              pval(ival 4,tval[pval(cval "c",ival 5)])
-              ]),
-   var "ls",
-   var "token",
-   var "last",
-   var "rls",
-   const(bval false)
-
-
-  ]
-)
+run (1,1,
+  [(6, "B");(3, "AB");(5, "ABBC")],
+         [(1,[("a", 2);("b", 6)]);
+          (2,[("b", 3)]);
+          (3,[("b", 4)]);
+          (4,[("c", 5)])],
+   ls,token,last,rls,false)
