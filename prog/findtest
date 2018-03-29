@@ -1,10 +1,5 @@
-([],
-
-
-if(exists(var "x", const(tval[pval(ival 1,cval "A");pval(ival 2,cval "B")])))
-(find(var "x", const(tval[pval(ival 1,cval "A");pval(ival 2,cval "B")])))
-(const(bval false))
-
-
-
-)
+if(exists(x, [(1,"A");(2,"B")])){
+  snd[find(x, [(1,"A");(2,"B")])]
+}else{
+  false
+}

@@ -1,6 +1,5 @@
 open SourceAst
 
-
 let rec eval p = (* Prog -> Prog *)
   let (fdefs,main) = p in
   eval' fdefs main Env.empty Func_Tbl.empty
@@ -156,6 +155,7 @@ and env_string env = (*Static parameter to Hash*)
       Printf.sprintf "%s_%s:%s" acc (print_expr i) (print_expr e))
       env "" in
   Printf.sprintf "_%s" (string_of_int (Hashtbl.hash a))
+  (* Printf.sprintf "_%s" a *)
 
 and ifdas s sas das state fdefs body =
 
@@ -250,7 +250,6 @@ and applyTransfo elemfind k s sas das rs_fd fdefs body =
 
 and newApply s sas das state fdefs body =
   let s' = s^(env_string sas) in
-
   begin
     match (Func_Tbl.find_opt s' state) with
     | Some _ ->
@@ -300,8 +299,8 @@ and prim o rs =
       match o,el1 with
       | TL,CVal(e)       -> CVal (String.sub e 1 ((String.length e)-1))
       | TL,TVal(e)       -> TVal (List.tl e)
-      | HD,CVal(e)       -> CVal (String.sub e 0 1)
-      | HD,TVal(e)       -> List.hd e
+      | HD,CVal(e)       -> if (String.length e) == 0 then CVal("") else CVal (String.sub e 0 1)
+      | HD,TVal(e)       -> if (List.length e) == 0 then TVal([]) else List.hd e
       | Length,CVal(e)   -> IVal (String.length e)
       | Length,TVal(e)   -> IVal (List.length e)
       | Fst,PVal(e1,_)   -> e1

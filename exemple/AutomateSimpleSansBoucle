@@ -1,0 +1,38 @@
+
+fun run (s,a,t,ls,token,last,rls,stack){
+  if(exists(s, t)){
+    if(exists(hd[ls],snd [find(s, t)])){
+      if(exists(s,a)){
+        run (snd[find(hd[ls],snd[find(s, t)])],a,t,tl[ls],token,snd[find(s,a)],ls,true)
+      }else{
+        run (snd[find(hd[ls],snd[find(s, t)])],a,t,tl[ls],token,last,rls,stack)
+      }
+    }else{
+      if(exists(s,a)){
+        snd[find(s,a)]
+      }else{
+        if(stack){
+          last
+        }else{
+          exception
+        }
+      }
+    }
+  }else{
+    if(exists(s,a)){
+      snd[find(s,a)]
+    }else{
+      if(stack){
+        last
+      }else{
+        exception
+      }
+    }
+  }
+}
+
+run (1,
+  [(2, "A");(3, "B")],
+         [(1,[("a", 2);("b", 3)]);
+          (3,[("b", 3)])],
+   ls,token,last,rls,false)

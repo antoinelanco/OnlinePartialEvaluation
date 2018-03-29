@@ -1,0 +1,52 @@
+
+fun run (d,s,a,t,ls,token,last,rls,stack){
+  if(equal [length[ls], 0]){
+    if(exists(s,a)){
+      add[token,snd [find(s,a)]]
+    }else{
+      if(stack){
+        run (d,d,a,t,rls,add[token,last],last,rls,false)
+      }else{
+        exception
+      }
+    }
+  }else{
+    if(exists(s, t)){
+      if(exists(hd[ls],snd [find(s, t)])){
+        if(exists(s,a)){
+          run (d,snd[find(hd[ls],snd[find(s, t)])],a,t,tl[ls],token,snd[find(s,a)],ls,true)
+        }else{
+          run (d,snd[find(hd[ls],snd[find(s, t)])],a,t,tl[ls],token,last,rls,stack)
+        }
+      }else{
+        if(exists(s,a)){
+          run (d,d,a,t, ls,add[token,snd[find(s,a)]],last,rls,stack)
+        }else{
+          if(stack){
+            run (d,d,a,t, rls,add [token,last],last,rls,false)
+          }else{
+            exception
+          }
+        }
+      }
+    }else{
+      if(exists(s,a)){
+        run (d,d,a,t,ls,add[token,snd[find(s,a)]],last,rls,stack)
+      }else{
+        if(stack){
+          run (d,d,a,t,rls,add[token,last],last,rls,false)
+        }else{
+          exception
+        }
+      }
+    }
+  }
+}
+
+run (1,1,
+  [(6, "B");(3, "AB");(5, "ABBC")],
+         [(1,[("a", 2);("b", 6)]);
+          (2,[("b", 3)]);
+          (3,[("b", 4)]);
+          (4,[("c", 5)])],
+   ls,token,0,rls,false)

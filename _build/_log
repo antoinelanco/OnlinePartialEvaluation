@@ -8,7 +8,7 @@ ocamlfind ocamldep -modules SourceAst.ml > SourceAst.ml.depends
 # Target: SourceAst.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:SourceAst.cmo, file:SourceAst.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -w -40 -o SourceAst.cmo SourceAst.ml
 # Target: Lexer.mll, tags: { extension:mll, file:Lexer.mll, lexer, ocaml, ocamllex, quiet }
-/home/Dexter/.opam/4.05.0/bin/ocamllex.opt -q Lexer.mll
+/usr/bin/ocamllex.opt -q Lexer.mll
 # Target: Lexer.ml.depends, tags: { extension:ml, file:Lexer.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules Lexer.ml > Lexer.ml.depends
 # Target: Parser.mly.depends, tags: { extension:mly, file:Parser.mly, infer, menhir_ocamldep, ocaml, ocamldep, quiet }
