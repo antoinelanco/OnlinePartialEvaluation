@@ -50,7 +50,7 @@ let rec print_prog p =
 and print_fdef fd = Func_Tbl.fold (fun key el acc ->
     let (arg_list,exp) = el in
     let args_lists =
-      let tmp = List.fold_left(fun ac i -> sprintf "%s,%s" ac (print_expr i )) "" arg_list in
+      let tmp = List.fold_left(fun ac i -> sprintf "%s,%s" ac i) "" arg_list in
       let taille = String.length tmp in
       if taille != 0
       then String.sub tmp 1 (taille-1)
@@ -67,7 +67,7 @@ and print_exprv2 space now = function
   | Apply(s,es)   -> sprintf "%s%s(%s)" now s (print_list_expr es)
   | Find(e1,e2)   -> sprintf "%sFind(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
   | Exists(e1,e2) -> sprintf "%sExists(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
-  | Switch(e1,es,e2) -> sprintf "%sSwitch(%s)(\n%s%sDefault -> %s)"
+  | Switch(e1,es,e2) -> sprintf "%sSwitch(%s):\n%s%sDefault -> %s"
                           now (print_exprv2 (space^"   ") "" e1) (print_case es (space^"   "))
                           (space^"   ") (print_exprv2 (space^"   ") "" e2)
 
@@ -95,7 +95,7 @@ and print_expr = function
   | Apply(s,es)   -> sprintf "%s(%s)" s (print_list_expr es)
   | Exists(e1,e2) -> sprintf "Exists(%s,%s)" (print_expr e1) (print_expr e2)
   | Find(e1,e2)   -> sprintf "Find(%s,%s)" (print_expr e1) (print_expr e2)
-  | Switch(e1,es,e2) -> sprintf "Switch(%s)(\n%sDefault -> %s)" (print_expr e1) (print_case es "   ") (print_expr e2)
+  | Switch(e1,es,e2) -> sprintf "Switch(%s):\n%sDefault -> %s" (print_expr e1) (print_case es "   ") (print_expr e2)
 
 and print_val = function
   | IVal i       -> sprintf "%d" i

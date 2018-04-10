@@ -1,5 +1,7 @@
-([],
-if(exists(prim tl[var "l"],const(tval[ival 1;ival 2])))
-(find(prim tl[var "l"],const(tval[ival 1;ival 2])))
-(exception)
-)
+fun test(x){
+  switch(x){
+  ("a",2)
+  }(exception)
+}
+
+test(x)

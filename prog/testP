@@ -1,4 +1,8 @@
-(
-[],
-  prim add [var "a", switch (var "a") [(ival 1,const(ival 2))] (var "a")  ]
-)
+fun exp (x,n){
+  if(equal[n,0]){
+    1
+  }else{
+    mul[x,exp(x,sub[n,1])]
+  }
+}
+exp(3,mul[2,find(x,[1;2;3;4;5;6])])

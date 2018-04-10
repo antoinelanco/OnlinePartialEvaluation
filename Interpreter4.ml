@@ -1,10 +1,10 @@
 open SourceAst
 
-let rec eval p = (* Prog -> Prog *)
+let rec eval p : SourceAst.prog = (* Prog -> Prog *)
   let (fdefs,main) = p in
   eval' fdefs main Env.empty Func_Tbl.empty
 
-and eval' fdefs main env state = (*Eval*)
+and eval' fdefs main env state : SourceAst.prog = (*Eval*)
   if ifExpProf main
   then (state,Exception)
   else
@@ -63,7 +63,12 @@ and eval' fdefs main env state = (*Eval*)
            else (fd2,If(ma0,ma1,ma2)))
 
       | Apply(s,es) ->
-        let (ss,body) = Func_Tbl.find s fdefs in
+        let (ss,body) =
+          begin
+            match Func_Tbl.find_opt s (Func_Tbl.merge merge_vars fdefs state) with
+            | Some n -> n
+            | None -> failwith ("La fonction "^s^" n'existe pas !")
+          end in
 
         let (rs_fd,rs_ma) = List.fold_left
             (fun (acc_fd,acc_ma) e ->
@@ -130,9 +135,15 @@ and eval' fdefs main env state = (*Eval*)
         let (fd1,ma1) = eval' fdefs e1 env state in
         if isVal ma1
         then
-          match List.assoc_opt (getVal ma1) es with
-          | Some n -> eval' fdefs n env fd1
-          | None -> eval' fdefs e2 env fd1
+          let listRes = List.find_all (fun i -> if (gFirst (getVal ma1) ) == fst i then true else false ) es in
+          if (List.length listRes) > 1
+          then failwith "a faire switch"
+          else
+          begin
+            match List.assoc_opt (getVal ma1) es with
+            | Some n -> eval' fdefs n env fd1
+            | None -> eval' fdefs e2 env fd1
+          end
         else
           let (new_state,new_es) = List.fold_left
               (fun acc (i1,i2) ->
@@ -150,14 +161,14 @@ and eval' fdefs main env state = (*Eval*)
     | Some n -> (e,n)
     | None -> res_match
 
-and env_string env = (*Static parameter to Hash*)
+and env_string env : string = (*Static parameter to Hash*)
   let a = Env.fold(fun i e acc ->
       Printf.sprintf "%s_%s:%s" acc (print_expr i) (print_expr e))
       env "" in
   Printf.sprintf "_%s" (string_of_int (Hashtbl.hash a))
   (* Printf.sprintf "_%s" a *)
 
-and ifdas s sas das state fdefs body =
+and ifdas s sas das state fdefs body : SourceAst.prog =
 
   if Env.is_empty das
   then eval' fdefs body sas state
@@ -168,12 +179,12 @@ and ifdas s sas das state fdefs body =
       | None -> newApply s sas das state fdefs body
     end
 
-and primTransfo elemfind k ar o env fdefs fd =
-  let (bef,aft) = getBeforT elemfind in
-  match aft with
+and primTransfo elemfind k ar o env fdefs fd : SourceAst.prog =
+
+  match elemfind with
   | If (e1,e2,e3) ->
-    let (a1,b1) = eval' fdefs (bef e2) env fd in
-    let (a2,b2) = eval' fdefs (bef e3) env fd in
+    let (a1,b1) = eval' fdefs e2 env fd in
+    let (a2,b2) = eval' fdefs e3 env fd in
 
     let new_ar1 = Env.add k b1 ar in
     let new_ar2 = Env.add k b2 ar in
@@ -187,7 +198,7 @@ and primTransfo elemfind k ar o env fdefs fd =
 
     let (new_env,new_es) = List.fold_left (fun (e,acc) (v1,ee) ->
 
-        let (a1,b1) = eval' fdefs (bef ee) env e in
+        let (a1,b1) = eval' fdefs ee env e in
         let new_ar = Env.add k b1 ar in
         let new_es = Env.fold (fun _ e acc -> acc@[e]) new_ar [] in
 
@@ -197,21 +208,20 @@ and primTransfo elemfind k ar o env fdefs fd =
       )
         (fd,[]) es in
 
-    let (a1,b1) = eval' fdefs (bef e2) env fd in
+    let (a1,b1) = eval' fdefs e2 env fd in
     let new_ar = Env.add k b1 ar in
     let new_ess = Env.fold (fun _ e acc -> acc@[e]) new_ar [] in
     eval' fdefs (Switch(e1,new_es,Prim(o,new_ess))) env fd
 
   | _ -> failwith "forcement un if/switch"
 
-and applyTransfo elemfind k s sas das rs_fd fdefs body =
+and applyTransfo elemfind k s sas das rs_fd fdefs body : SourceAst.prog =
 
-  let (bef,aft) = getBeforT elemfind in
-  match aft with
+  match elemfind with
   | If (e1,e2,e3) ->
 
-    let (a1,b1) = eval' fdefs (bef e2) sas rs_fd in
-    let (a2,b2) = eval' fdefs (bef e3) sas rs_fd in
+    let (a1,b1) = eval' fdefs e2 sas rs_fd in
+    let (a2,b2) = eval' fdefs e3 sas rs_fd in
 
 
     let new_das = Env.remove k das in
@@ -229,7 +239,7 @@ and applyTransfo elemfind k s sas das rs_fd fdefs body =
 
     let (new_env,new_es) = List.fold_left (fun (e,acc) (v1,ee) ->
 
-        let (a1,b1) = eval' fdefs (bef ee) sas e in
+        let (a1,b1) = eval' fdefs ee sas e in
         let (new_sas1,new_das1) = if (isVal(b1)) then (Env.add k b1 sas,new_das) else (sas,Env.add k b1 new_das) in
         let (a,b) = ifdas s new_sas1 new_das1 a1 fdefs body in
         if ifExpEnv new_das1
@@ -239,7 +249,7 @@ and applyTransfo elemfind k s sas das rs_fd fdefs body =
       )
         (rs_fd,[]) es in
 
-    let (a1,b1) = eval' fdefs (bef e2) sas new_env in
+    let (a1,b1) = eval' fdefs e2 sas new_env in
     let (new_sas1,new_das1) = if (isVal(b1)) then (Env.add k b1 sas,new_das) else (sas,Env.add k b1 new_das) in
     let (a,b) = ifdas s new_sas1 new_das1 a1 fdefs body in
     if ifExpEnv new_das1
@@ -248,7 +258,7 @@ and applyTransfo elemfind k s sas das rs_fd fdefs body =
 
   | _ -> failwith "forcement un if/switch"
 
-and newApply s sas das state fdefs body =
+and newApply s sas das state fdefs body : SourceAst.prog =
   let s' = s^(env_string sas) in
   begin
     match (Func_Tbl.find_opt s' state) with
@@ -261,37 +271,29 @@ and newApply s sas das state fdefs body =
       let (e'_fd,e'_ma) = eval' fdefs body sas n_m in
       if existsif e'_ma
       then
-        let new_das = Env.fold (fun s _ acc -> acc@[s] ) das [] in
+        let new_das = Env.fold (fun s _ acc -> acc@[varString(s)] ) das [] in
         let state = Func_Tbl.add s' (new_das,e'_ma) e'_fd in
         let param = Env.fold (fun i e acc -> acc@[e]) das [] in
         (state,Apply(s',param))
+
       else
-        eval' fdefs e'_ma das state
+        (Func_Tbl.remove s' e'_fd,e'_ma)
 
   end
 
-and getBeforT exp_r =
-  let rec aux acc = function
-    | If (e1,e2,e3) -> (acc,If(e1,e2,e3))
-    | Switch(e1,es,e2) -> (acc,Switch(e1,es,e2))
-    | Const _ | Var _ -> failwith "getBeforT 0nly with if or switch"
-    | _ -> failwith "ca peut pas arriver"
-  in
-  aux (fun x -> x) exp_r
-
-and findif expr_list =
+and findif expr_list : (SourceAst.expr * SourceAst.Env.key) option =
   Env.fold (fun k i acc ->
       if (existsif i)
       then Some (i,k)
       else acc)
     expr_list None
 
-and existsif = function
+and existsif : SourceAst.expr -> bool = function
   | Switch _ | If _ -> true
   | Prim(_,es) -> List.exists(fun i -> existsif i ) es
   | _ -> false
 
-and prim o rs =
+and prim o rs : SourceAst.vall =
   match List.length rs with
   | 1 ->
     begin
@@ -331,7 +333,7 @@ and prim o rs =
     end
   | _ -> failwith "Bin0p 0nly 1 or 2 arg"
 
-and ifExpProf = function
+and ifExpProf : SourceAst.expr -> bool = function
   | Const _ | Var _ -> false
   | Exception       -> true
   | Prim(_,es) | Apply(_,es) -> List.exists(fun i -> ifExpProf i ) es
@@ -339,32 +341,36 @@ and ifExpProf = function
   | Find (e1,e2) | Exists (e1,e2)  -> ifExpProf e1 || ifExpProf e2
   | Switch(e1,_,_)  -> ifExpProf e1
 
-and ifExpEnv env =
+and ifExpEnv env : bool =
   Env.exists (fun k a -> if ifExpProf a then true else false ) env
 
-and val_to_bool = function
+and val_to_bool : SourceAst.expr -> bool = function
   | Const(BVal b) -> b
   | _ -> failwith "N0t a b00lean value"
 
-and allIsVal =
+and allIsVal : SourceAst.expr list -> bool =
   List.fold_left  (fun acc i -> match i with
       | Const _ -> acc
       | _ -> false ) true
 
-and mapVal =
+and mapVal : SourceAst.expr list -> vall list =
   List.map (fun i -> match i with
       | Const n -> n
       | _ -> failwith "C0nst 0nly")
 
-and isVal = function
+and isVal : SourceAst.expr -> bool  = function
   | Const _ -> true
   | _ -> false
 
-and getVal = function
+and getVal : SourceAst.expr -> SourceAst.vall = function
   | Const n -> n
   | _ -> failwith "N0t Const"
 
-and gFirst = function
+and gFirst : SourceAst.vall -> SourceAst.vall = function
   | PVal (n1,n2) -> n1
   | TVal n -> failwith "gFirst TVal"
   | n -> n
+
+and varString : SourceAst.expr -> string = function
+  | Var n -> n
+  | _ -> failwith "Is N0T a Var"
