@@ -1,0 +1,8 @@
+fun exp (x,n){
+  if(equal[n,0]){
+    1
+  }else{
+    mul[x,exp(x,sub[n,1])]
+  }
+}
+exp(3,mul[2,snd[find(x,[("a",1);("b",2);("c",3);("d",4);("e",5);("f",6)])]])

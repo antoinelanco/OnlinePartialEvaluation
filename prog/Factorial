@@ -1,0 +1,10 @@
+
+fun fac (n){
+ if(equal[n,1]){
+  1
+ }else{
+  mul[fac(sub[n,1]),n]
+ }
+}
+
+fac (3)

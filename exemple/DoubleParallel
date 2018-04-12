@@ -1,0 +1,47 @@
+fun run (s,a,t,ls,token,last,rls,stack){
+  if(exists(s, t)){
+    if(exists(hd[ls],snd [find(s, t)])){
+      if(exists(s,a)){
+        run (snd[find(hd[ls],snd[find(s, t)])],a,t,tl[ls],token,snd[find(s,a)],ls,true)
+      }else{
+        run (snd[find(hd[ls],snd[find(s, t)])],a,t,tl[ls],token,last,rls,stack)
+      }
+    }else{
+      if(exists(s,a)){
+        snd[find(s,a)]
+      }else{
+        if(stack){
+          last
+        }else{
+          exception
+        }
+      }
+    }
+  }else{
+    if(exists(s,a)){
+      snd[find(s,a)]
+    }else{
+      if(stack){
+        last
+      }else{
+        exception
+      }
+    }
+  }
+}
+
+
+fun double (s,af,tf,as,ts,ls,token,last,rls,stack){
+  add[run (s,af,tf,ls,token,last,rls,false),run (s,as,ts,ls,token,last,rls,false)]
+}
+
+double (
+  1,
+  [(12, "A");(13, "B");(15, "X")],
+  [(1,[("a", 12);("b", 13)]);(12,[("x",15)])],
+
+  [(22, "A");(23, "C");(24, "CD");(25, "X")],
+  [(1,[("a", 22);("c", 23)]);(23,[("d",24)]);(22,[("x",25)])],
+
+  ls,token,last,rls,false
+)

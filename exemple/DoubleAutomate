@@ -1,0 +1,51 @@
+
+fun run (s,af,tf,as,ts,ls,token,last,rls,stack){
+  if(exists(s, add[tf,ts])){
+    if(exists(hd[ls],findssnd(s,tf,ts))){
+      if(exists(s,add[af,as])){
+        run (snd[find(hd[ls],findssnd(s,tf,ts))],af,tf,as,ts,tl[ls],token,snd[find(s,add[af,as])],ls,true)
+      }else{
+        run (snd[find(hd[ls],findssnd(s,tf,ts))],af,tf,as,ts,tl[ls],token,last,rls,stack)
+      }
+    }else{
+      if(exists(s,add[af,as])){
+        snd[find(s,add[af,as])]
+      }else{
+        if(stack){
+          last
+        }else{
+          exception
+        }
+      }
+    }
+  }else{
+    if(exists(s,add[af,as])){
+      snd[find(s,add[af,as])]
+    }else{
+      if(stack){
+        last
+      }else{
+        exception
+      }
+    }
+  }
+}
+
+fun findssnd(s,tf,ts){
+  if(equal[s,1]){
+    add[snd[find(1,tf)],snd[find(1,ts)]]
+  }else{
+    snd[find(s, add[tf,ts])]
+  }
+}
+
+run (
+  1,
+  [(12, "A");(13, "B")],
+  [(1,[("a", 12);("b", 13)])],
+
+  [(22, "A");(23, "C");(24, "CD")],
+  [(1,[("a", 22);("c", 23)]);(22,[("d",24)])],
+
+  ls,token,last,rls,false
+  )
