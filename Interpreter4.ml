@@ -115,7 +115,14 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
          | true,true ->
            (match ma2 with
             | Const(TVal n) ->
+              let blen = List.find_all (fun i -> if (gFirst i) = (getVal ma1) then true else false) n in
               let b = List.find_opt (fun i -> if (gFirst i) = (getVal ma1) then true else false) n in
+              if (List.length blen) > 1
+              then
+                let cases = List.fold_left (fun acc i -> acc@[(gFirst i,Const(i))]) [] n in
+                eval' fdefs (Switch(ma1,cases,Exception)) env fd2
+              else
+
               (match b with
                | Some n -> (fd2,Const(n))
                | _ -> (state,Exception))
@@ -135,9 +142,26 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
         let (fd1,ma1) = eval' fdefs e1 env state in
         if isVal ma1
         then
-          let listRes = List.find_all (fun i -> if (gFirst (getVal ma1) ) == fst i then true else false ) es in
+          let listRes = List.filter (fun i -> eqVal (gFirst (getVal ma1) ) (fst i) ) es in
           if (List.length listRes) > 1
-          then failwith "a faire switch"
+          then
+
+          let (new_state,new_es) = List.fold_left
+              (fun acc (i1,i2) ->
+                 let (acc_fd,acc_ma) = acc in
+                 let (fd2,ma2) = eval' fdefs i2 (Env.add ma1 (Const i1) env) acc_fd in
+                 if (eqVal (gFirst (getVal ma1)) i1 &&
+                  not (List.exists(fun (a,b) -> if b = ma2 then true else false ) (snd acc)))
+                 then
+                   (fd2,acc_ma@[(i1,ma2)])
+                 else acc
+
+
+                 )
+              (state,[]) es
+          in
+          (new_state,Switch(ma1,new_es,Exception))
+
           else
           begin
             match List.assoc_opt (getVal ma1) es with
@@ -149,7 +173,11 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
               (fun acc (i1,i2) ->
                  let (acc_fd,acc_ma) = acc in
                  let (fd2,ma2) = eval' fdefs i2 (Env.add ma1 (Const i1) env) acc_fd in
-                 (fd2,acc_ma@[(i1,ma2)]))
+                 if not (List.exists(fun (a,b) -> if b = ma2 then true else false ) (snd acc))
+                 then
+                   (fd2,acc_ma@[(i1,ma2)])
+                 else acc
+)
               (state,[]) es
           in
           let (new_state,new_e2) = eval' fdefs e2 env new_state in
@@ -374,3 +402,8 @@ and gFirst : SourceAst.vall -> SourceAst.vall = function
 and varString : SourceAst.expr -> string = function
   | Var n -> n
   | _ -> failwith "Is N0T a Var"
+
+and eqVal v1 v2 : bool =
+  if String.equal (print_val v1) (print_val v2)
+  then true
+  else false

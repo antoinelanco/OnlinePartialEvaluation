@@ -1,7 +1,5 @@
-fun test(x){
-  switch(x){
-  ("a",2)
-  }(exception)
+fun test(x,y){
+  find("b",y)
 }
 
-test(x)
+test(x,[("a",1);("b",2);("b",3)])
