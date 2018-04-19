@@ -1,5 +1,9 @@
 fun test(x,y){
-  find("b",y)
+  if(exists(x,y)){
+    find(x,y)
+  }else{
+    exception
+  }
 }
 
 test(x,[("a",1);("b",2);("b",3)])

@@ -115,17 +115,17 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
          | true,true ->
            (match ma2 with
             | Const(TVal n) ->
-              let blen = List.find_all (fun i -> if (gFirst i) = (getVal ma1) then true else false) n in
               let b = List.find_opt (fun i -> if (gFirst i) = (getVal ma1) then true else false) n in
+              let blen = List.find_all (fun i -> if (gFirst i) = (getVal ma1) then true else false) n in
               if (List.length blen) > 1
               then
                 let cases = List.fold_left (fun acc i -> acc@[(gFirst i,Const(i))]) [] n in
                 eval' fdefs (Switch(ma1,cases,Exception)) env fd2
               else
 
-              (match b with
-               | Some n -> (fd2,Const(n))
-               | _ -> (state,Exception))
+                (match b with
+                 | Some n -> (fd2,Const(n))
+                 | _ -> (state,Exception))
 
             | _ -> failwith "arg 2 0f find need t0 be a TVal")
 
@@ -139,47 +139,46 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
          |_,_ -> (fd2,Find(ma1,ma2)) )
 
       | Switch(e1,es,e2) ->
+
         let (fd1,ma1) = eval' fdefs e1 env state in
         if isVal ma1
         then
-          let listRes = List.filter (fun i -> eqVal (gFirst (getVal ma1) ) (fst i) ) es in
+
+          let listRes = List.filter (fun (a,b) -> eqVal (gFirst (getVal ma1)) a ) es in
           if (List.length listRes) > 1
           then
-
-          let (new_state,new_es) = List.fold_left
-              (fun acc (i1,i2) ->
-                 let (acc_fd,acc_ma) = acc in
-                 let (fd2,ma2) = eval' fdefs i2 (Env.add ma1 (Const i1) env) acc_fd in
-                 if (eqVal (gFirst (getVal ma1)) i1 &&
-                  not (List.exists(fun (a,b) -> if b = ma2 then true else false ) (snd acc)))
-                 then
-                   (fd2,acc_ma@[(i1,ma2)])
-                 else acc
-
-
-                 )
-              (state,[]) es
-          in
-          (new_state,Switch(ma1,new_es,Exception))
+            let (new_state,new_es) = List.fold_left
+                (fun acc (i1,i2) ->
+                   let (acc_fd,acc_ma) = acc in
+                   let (fd2,ma2) = eval' fdefs i2 (Env.add ma1 (Const i1) env) acc_fd in
+                   if (eqVal (gFirst (getVal ma1)) i1 &&
+                       not (List.exists(fun (a,b) -> if (a,b) = (i1,ma2) then true else false ) (snd acc)))
+                   then
+                     (fd2,acc_ma@[(i1,ma2)])
+                   else acc
+                )
+                (state,[]) es
+            in
+            (new_state,Switch(ma1,new_es,Exception))
 
           else
-          begin
-            match List.assoc_opt (getVal ma1) es with
-            | Some n -> eval' fdefs n env fd1
-            | None -> eval' fdefs e2 env fd1
-          end
+            begin
+              match List.assoc_opt (getVal ma1) es with
+              | Some n -> eval' fdefs n env fd1
+              | None -> eval' fdefs e2 env fd1
+            end
         else
           let (new_state,new_es) = List.fold_left
               (fun acc (i1,i2) ->
                  let (acc_fd,acc_ma) = acc in
                  let (fd2,ma2) = eval' fdefs i2 (Env.add ma1 (Const i1) env) acc_fd in
-                 if not (List.exists(fun (a,b) -> if b = ma2 then true else false ) (snd acc))
-                 then
-                   (fd2,acc_ma@[(i1,ma2)])
-                 else acc
-)
+                 if (List.exists(fun (a,b) -> if (a,b) = (i1,ma2) then true else false ) (snd acc))
+                 then acc
+                 else (fd2,acc_ma@[(i1,ma2)])
+              )
               (state,[]) es
           in
+
           let (new_state,new_e2) = eval' fdefs e2 env new_state in
           (new_state,Switch(ma1,new_es,new_e2))
     in
@@ -194,7 +193,7 @@ and env_string env : string = (*Static parameter to Hash*)
       Printf.sprintf "%s_%s:%s" acc (print_expr i) (print_expr e))
       env "" in
   Printf.sprintf "_%s" (string_of_int (Hashtbl.hash a))
-  (* Printf.sprintf "_%s" a *)
+(* Printf.sprintf "_%s" a *)
 
 and ifdas s sas das state fdefs body : SourceAst.prog =
 

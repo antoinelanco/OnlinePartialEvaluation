@@ -1,0 +1,36 @@
+
+fun run (s,a,t,ls){
+  if(exists(s,a)){
+    true
+  }else{
+    if(exists(s,t)){
+      iter(ls,snd[find(s,t)],t,a)
+    }else{
+      false
+    }
+  }
+}
+
+fun iter (ls,t,ts,a){
+  if(equal[length[t],0]){
+    false
+  }else{
+    if(equal[hd[ls],fst[hd[t]]]){
+      if(run(snd[hd[t]],a,ts,tl[ls])){
+        true
+      }else{
+        iter(ls,tl[t],ts,a)
+      }
+    }else{
+      iter(ls,tl[t],ts,a)
+    }
+  }
+}
+
+run (1,
+  [(5, "A")],
+         [(1,[("a", 2);("a", 3)]);
+          (2,[("b", 4)]);
+          (3,[("b", 4)]);
+          (4,[("c", 5)])],
+   ls)
