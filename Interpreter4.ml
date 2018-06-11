@@ -60,7 +60,12 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
            let (fd2,ma2) = eval' fdefs e2 env fd1 in
            if ma1 = ma2
            then (fd2,ma1)
-           else (fd2,If(ma0,ma1,ma2)))
+           else
+           begin
+            if ((ma1 = (Const(BVal true))) && (ma2 = (Const(BVal false))))
+            then (fd2,ma0)
+            else (fd2,If(ma0,ma1,ma2))
+           end)
 
       | Apply(s,es) ->
         let (ss,body) =

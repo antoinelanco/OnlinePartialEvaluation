@@ -1,0 +1,22 @@
+
+fun run (s,a,t,ls){
+  if(exists(s,a)){
+    true
+  }else{
+    if(exists(s,t)){
+      if(exists(hd[ls],snd[find(s,t)])){
+        run(snd[find(hd[ls],snd[find(s,t)])],a,t,tl[ls])
+      }else{
+        false
+      }
+    }else{
+      false
+    }
+  }
+}
+
+run (1,
+  [2;4],
+         [(1,[("a", 2);("b", 3)]);
+          (3,[("c", 4)])],
+   ls)

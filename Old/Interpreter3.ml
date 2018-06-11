@@ -140,17 +140,6 @@ and eval' fdefs main env state =
               (fd2,Const(BVal b))
             | _ -> failwith "arg 2 0f exists need t0 be a TVal")
 
-         (* | false,true ->
-            (match ma2 with
-             | Const(TVal n) ->
-               if (List.length n) == 0
-               then (fd2,Const(BVal false))
-               else
-               (fd2,List.fold_left (fun acc i ->
-                 If(Prim(Eq,[ma1;Const(gFirst i)]),Const(BVal true),acc))
-               (Prim(Eq,[ma1;Const(gFirst (List.hd n))]))
-               (List.tl n))
-             | _ -> failwith "arg 2 0f exists need t0 be a TVal") *)
 
          | false,true ->
            (match ma2 with

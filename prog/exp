@@ -7,9 +7,4 @@ fun exp (x,n){
 }
 
 
-
-
-
-
-
 exp(3,n)

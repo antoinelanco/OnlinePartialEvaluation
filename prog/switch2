@@ -1,1 +1,5 @@
-([],switch (var "a") [(ival 1,const(ival 2))] (var "a"))
+if(exists(x,[(1,"A");(2,"B")])){
+  snd[find(x,[(1,"A");(2,"B")])]
+}else{
+  "C"
+}

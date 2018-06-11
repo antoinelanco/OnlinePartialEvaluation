@@ -1,23 +1,18 @@
 
-.PHONY: 	all clean native profile debug sanity test
+.PHONY: 	all clean native depend
 
 OCB_FLAGS   = -cflag -w -cflag -40 -use-ocamlfind -use-menhir
 OCB = ocamlbuild $(OCB_FLAGS)
 
-all: native # profile debug
+all: native
 
 clean:
 	$(OCB) -clean
 
-native: sanity
+native: depend
 	$(OCB) Main.native
 
-profile: sanity
-	$(OCB) -tag profile Main.native
+depend:
+	ocamldep *.ml > .depend
 
-# check that menhir is installed, use "opam install menhir"
-sanity:
-	which menhir
-
-test: native
-	./main.native "2 + 3 * 3"
+include .depend

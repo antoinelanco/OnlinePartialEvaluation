@@ -1,0 +1,12 @@
+Interpreter4.cmo : SourceAst.cmo
+Interpreter4.cmx : SourceAst.cmx
+Lib.cmo : SourceAst.cmo
+Lib.cmx : SourceAst.cmx
+Main.cmo : Printer.cmo Interpreter4.cmo
+Main.cmx : Printer.cmx Interpreter4.cmx
+Printer.cmo : SourceAst.cmo
+Printer.cmx : SourceAst.cmx
+SourceAst.cmo :
+SourceAst.cmx :
+StateMachine.cmo :
+StateMachine.cmx :
