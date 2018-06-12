@@ -309,9 +309,22 @@ and newApply s sas das state fdefs body : SourceAst.prog =
         (state,Apply(s',param))
 
       else
-        (Func_Tbl.remove s' e'_fd,e'_ma)
+        let new_env = das in
+        (Func_Tbl.remove s' e'_fd, symbol new_env e'_ma)
+        (* eval' fdefs e'_ma das (Func_Tbl.remove s' e'_fd) *)
 
   end
+
+and symbol env : SourceAst.expr -> SourceAst.expr = function
+| Var n -> (match Env.find_opt (Var n) env with
+           | Some a -> a
+           | None -> Var n)
+
+| Prim(x,es) -> Prim (x,List.map(fun i -> symbol env i ) es)
+| Apply(x,es) -> Apply (x,List.map(fun i -> symbol env i ) es)
+| Find (e1,e2) -> Find(symbol env e1,symbol env e2)
+| Exists (e1,e2) -> Exists(symbol env e1,symbol env e2)
+| x -> x
 
 and findif expr_list : (SourceAst.expr * SourceAst.Env.key) option =
   Env.fold (fun k i acc ->
