@@ -15,31 +15,49 @@ fun decalg(p){
 }
 
 fun decald(p){
-
+  (rev[tl[rev[fst[p]]]],add[hd[rev[fst[p]]],snd[p]])
 }
 
-let decald (x,y) =
-  let a = List.hd (List.rev x) in
-  let b = List.rev (List.tl (List.rev x)) in
-  (b,a::y)
+fun notEmpty(d){
+  if(equal[length[d],0]){
+    [("_",[])]
+  }else{d}
+}
 
-let notEmpty d = if List.length d = 0 then [("_",[])] else d
+fun run(s,a,t,ls,dsc1,dsc2){
+  if(exists(s,a)){
+    (true,(dsc1,dsc2))
+  }else{
+    if(exists(s,t)){
+      iter(ls,find(s,t),t,a,dsc1,dsc2)
+    }else{
+      (false,decald((dsc1,dsc2)))
+    }
+  }
+}
 
+fun aux(ls,t,ts,a,res){
+  if(fst[res]){
+    (true,(fst[snd[res]],snd[snd[res]]))
+  }else{
+    iter(ls,tl[t],ts,a,fst[snd[res]],snd[snd[res]])
+  }
+}
 
-let rec run s a t ls dsc1 dsc2 =
-  if List.mem_assoc s a
-  then (true,(dsc1,dsc2))
-  else
-  if List.mem_assoc s t
-  then iter ls (List.assoc s t) t a dsc1 dsc2
-  else (false,decald (dsc1,dsc2))
-
-and aux ls t ts a res =
-  if fst res
-  then (true,(fst (snd res),snd (snd res)))
-  else iter ls (List.tl t) ts a (fst (snd res)) (snd (snd res)) (*BACKTRACK*)
-
-
+fun iter(ls,t,ts,a,dsc1,dsc2){
+  if(equal[mul[length[t],length[ls]],0]){
+    (false,decald(dsc1,notEmpty(dsc2)))
+  }else{
+    switch(staticmatch(fst[hd[t]],hd[notEmpty(dsc2)]))[
+      (0,iter(ls,tl[t],ts,a,dsc1,notEmpty(dsc2)));
+      (1,aux(ls,t,ts,a,run(snd[hd[t]],a,ts,tl[ls],
+                  add[dsc1,hd[notEmpty(dsc2)]],
+                   tl[notEmpty[dsc2]]   )));
+      (2,1)
+    ]
+    (exception)
+  }
+}
 
 and iter ls t ts a dsc1 dsc2 =
   if List.length t = 0 || List.length ls = 0
@@ -63,9 +81,10 @@ and iter ls t ts a dsc1 dsc2 =
 
     | _ -> failwith "only 0,1,2"
 
-let s = 1
-let a = [(5, "A")]
+
+
+
 let t = [(1,[("a", 2);("a", 3)]);(2,[("d", 4);("b", 6)]);
          (3,[("b", 4)]);(4,[("c", 5)])]
-let ls = ["a";"b";"c"]
-let (x,y) = run s a t ls [] []
+
+run(1 [(5, "A")],t,ls,[],[])

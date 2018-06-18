@@ -1,5 +1,13 @@
-fun decalg(p){
-  rev[p]
-}
 
-decalg ([1;2])
+fun iter(ls,t,ts,a,dsc1,dsc2){
+  if(equal[mul[length[t],length[ls]],0]){
+    (false,decald(dsc1,notEmpty(dsc2)))
+  }else{
+    switch(staticmatch(fst[hd[t]],hd[notEmpty(dsc2)]))[
+      (0,iter(ls,tl[t],ts,a,dsc1,notEmpty(dsc2)));
+      (2,1)
+    ]
+    (exception)
+  }
+}
+1
