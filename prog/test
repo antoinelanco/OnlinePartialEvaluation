@@ -1,14 +1,5 @@
-fun run (a,b){
-  if(equal[a,b]){
-    a
-  }else{
-    b
-  }
+fun decalg(p){
+  (add[fst[p],hd[snd[p]]],tl[snd [p]])
 }
 
-
-fun double (a,b){
-  add[run (a,10),run(b,20)]
-}
-
-double (a,2)
+decalg (([1],[2]))
