@@ -8,6 +8,7 @@ type token =
   | SUB
   | SND
   | SEMI
+  | REV
   | MULT
   | LITINT of (int)
   | LENGTH

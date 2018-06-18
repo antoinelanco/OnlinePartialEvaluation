@@ -11,7 +11,7 @@
 %token IF ELSE
 %token TRUE FALSE
 %token ADD MULT SUB EQ
-%token TL HD LENGTH
+%token TL HD LENGTH REV
 %token BB EB FB FE
 %token DCOTE
 %token FST SND ISPAIR
@@ -77,6 +77,7 @@ op:
 | EQ     { Eq }
 | TL     { TL }
 | HD     { HD }
+| REV    { REV }
 | FST    { Fst }
 | SND    { Snd }
 | LENGTH { Length }

@@ -19,6 +19,7 @@
         "ispair",   ISPAIR;
         "tl",       TL;
         "hd",       HD;
+        "rev",      REV;
         "length",   LENGTH;
         "add",      ADD;
         "mul",      MULT;

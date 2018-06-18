@@ -345,6 +345,7 @@ and prim o rs : SourceAst.expr =
       | HD,Tab e         -> if (List.length e) == 0
                             then Tab([])
                             else List.hd e
+      | REV,Tab e            -> Tab(List.rev e)
       | Length,Const(CVal e) -> Const(IVal (String.length e))
       | Length,Tab e         -> Const(IVal (List.length e))
       | Fst,Pair(e1,_)       -> e1

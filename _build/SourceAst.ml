@@ -34,6 +34,7 @@ and op =
   | Eq
   | TL
   | HD
+  | REV
   | Length
   | Fst
   | Snd
@@ -115,6 +116,7 @@ and print_op = function
   | Eq -> "=="
   | TL -> "TL"
   | HD -> "HD"
+  | REV -> "REV"
   | Fst -> "Fst"
   | Snd -> "Snd"
   | Length -> "Length"

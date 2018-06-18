@@ -1,5 +1,5 @@
 fun decalg(p){
-  (add[fst[p],hd[snd[p]]],tl[snd [p]])
+  rev[p]
 }
 
-decalg (([1],[2]))
+decalg ([1;2])
