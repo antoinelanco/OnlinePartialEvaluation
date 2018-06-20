@@ -23,6 +23,8 @@ and expr =
   | Switch of expr * case list * expr
   | Pair   of expr * expr
   | Tab    of expr list
+  | AND    of expr * expr
+  | OR     of expr * expr
 
 
 and case = vall * expr
@@ -62,7 +64,7 @@ and print_fdef fd = Func_Tbl.fold (fun key el acc ->
     sprintf "%s\n\nFonction : %s(%s){\n%s\n}\n" acc key args_lists (print_exprv2 "   " "   " exp) ) fd ""
 
 and print_exprv2 space now = function
-  | Exception      -> sprintf "%sException" now
+  | Exception     -> sprintf "%sException" now
   | Const(v)      -> sprintf "%s%s" now (print_val v)
   | Var(s)        -> sprintf "%s%s" now s
   | Prim(o,es)    -> sprintf "%s(%s)" now (List.fold_left(fun ac i -> sprintf "%s,%s" ac (print_exprv2 space "" i)) (print_op o) es)
@@ -70,6 +72,8 @@ and print_exprv2 space now = function
   | Find(e1,e2)   -> sprintf "%sFind(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
   | Exists(e1,e2) -> sprintf "%sExists(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
   | Pair(e1,e2)   -> sprintf "%s(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
+  | OR(e1,e2)     -> sprintf "%s%s OR %s" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
+  | AND(e1,e2)    -> sprintf "%s%s AND %s" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
   | Tab(es)       -> sprintf "%sTab[%s]" now (print_list_expr es)
   | Switch(e1,es,e2) -> sprintf "%sSwitch(%s):\n%s%sDefault -> %s"
                           now (print_exprv2 (space^"   ") "" e1) (print_case es (space^"   "))
@@ -101,6 +105,8 @@ and print_expr = function
   | Find(e1,e2)   -> sprintf "Find(%s,%s)" (print_expr e1) (print_expr e2)
   | Switch(e1,es,e2) -> sprintf "Switch(%s):\n%sDefault -> %s" (print_expr e1) (print_case es "   ") (print_expr e2)
   | Pair(e1,e2)   -> sprintf "(%s,%s)" (print_expr e1) (print_expr e2)
+  | OR(e1,e2)     -> sprintf "%s OR %s" (print_expr e1) (print_expr e2)
+  | AND(e1,e2)     -> sprintf "%s AND %s" (print_expr e1) (print_expr e2)
   | Tab(es)       -> sprintf "Tab(%s)" (print_list_expr es)
 
 

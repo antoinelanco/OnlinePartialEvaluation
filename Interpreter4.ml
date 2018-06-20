@@ -33,6 +33,32 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
         in
         (fd,Tab(ma))
 
+      | OR(e1,e2) ->
+        let (fd1,ma1) = eval' fdefs e1 env state in
+
+        if isVal ma1
+        then if val_to_bool ma1
+             then (fd1,Const (BVal true))
+             else
+             let (fd2,ma2) = eval' fd1 e2 env state in
+             if isVal ma2
+             then if val_to_bool ma2
+                  then (fd2,Const (BVal true))
+                  else (fd2,Const (BVal false))
+             else (fd2,ma2)
+        else
+        let (fd2,ma2) = eval' fd1 e2 env state in
+        if isVal ma2
+        then if val_to_bool ma2
+             then (fd2,Const (BVal true))
+             else (fd2,Const (BVal false))
+        else (fd2,OR(ma1,ma2))
+
+
+
+
+      | AND(e1,e2) -> (state,AND(e1,e2)) (*Afaire*)
+
       | Prim(o,es) ->
         let (fd,ma) = List.fold_left
             (fun acc e ->
@@ -386,7 +412,8 @@ and ifExpProf : SourceAst.expr -> bool = function
   | Exception       -> true
   | Prim(_,es) | Apply(_,es) | Tab es -> List.exists(fun i -> ifExpProf i ) es
   | If (e1,e2,e3)   -> ifExpProf e1 || (ifExpProf e2 && ifExpProf e3)
-  | Find (e1,e2) | Exists (e1,e2) | Pair(e1,e2) -> ifExpProf e1 || ifExpProf e2
+  | Find (e1,e2) | Exists (e1,e2) | Pair(e1,e2) | AND(e1,e2) | OR(e1,e2)
+                  -> ifExpProf e1 || ifExpProf e2
   | Switch(e1,_,_)  -> ifExpProf e1
 
 
@@ -401,7 +428,7 @@ and allIsVal (es: SourceAst.expr list) : bool =
   List.fold_left  (fun acc -> function
       | Const _ -> acc
       | Tab es when allIsVal es -> acc
-      | Pair (e1,e2) when allIsVal [e1;e2] -> acc
+      | Pair (e1,e2) when isVal e1 && isVal e2 -> acc
       | _ -> false ) true es
 
 and isVal : SourceAst.expr -> bool  = function

@@ -1,0 +1,101 @@
+Definition Fonction :
+ 
+
+Fonction : run_17227351(last,ls,rls,token){
+   If((==,(Length,ls),0)){
+      Exception
+   }Else{
+      Switch((HD,ls)):
+         Case('a') -> run_474099470(last;(TL,ls);rls;token)
+         Case('b') -> run_895905548(last;(TL,ls);rls;token)
+         Default -> Exception
+   }
+}
+
+
+Fonction : run_175446038(ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'A')
+   }Else{
+      run_370601112(ls;rls;(+,token,'A'))
+   }
+}
+
+
+Fonction : run_370601112(ls,rls,token){
+   If((==,(Length,ls),0)){
+      run_83992699(rls;rls;(+,token,'B'))
+   }Else{
+      Switch((HD,ls)):
+         Case('a') -> run_175446038((TL,ls);rls;token)
+         Case('b') -> run_976663698((TL,ls);rls;token)
+         Default -> run_83992699(rls;rls;(+,token,'B'))
+   }
+}
+
+
+Fonction : run_470246840(ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'B')
+   }Else{
+      Switch((HD,ls)):
+         Case('b') -> run_976663698((TL,ls);ls;token)
+         Default -> run_83992699(ls;rls;(+,token,'B'))
+   }
+}
+
+
+Fonction : run_474099470(last,ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'A')
+   }Else{
+      run_17227351(last;ls;rls;(+,token,'A'))
+   }
+}
+
+
+Fonction : run_83992699(ls,rls,token){
+   If((==,(Length,ls),0)){
+      Exception
+   }Else{
+      Switch((HD,ls)):
+         Case('a') -> run_921431423((TL,ls);rls;token)
+         Case('b') -> run_470246840((TL,ls);rls;token)
+         Default -> Exception
+   }
+}
+
+
+Fonction : run_895905548(last,ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'B')
+   }Else{
+      Switch((HD,ls)):
+         Case('b') -> run_976663698((TL,ls);ls;token)
+         Default -> run_17227351(last;ls;rls;(+,token,'B'))
+   }
+}
+
+
+Fonction : run_921431423(ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'A')
+   }Else{
+      run_83992699(ls;rls;(+,token,'A'))
+   }
+}
+
+
+Fonction : run_976663698(ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'B')
+   }Else{
+      Switch((HD,ls)):
+         Case('b') -> run_976663698((TL,ls);ls;token)
+         Default -> run_370601112(ls;rls;(+,token,'B'))
+   }
+}
+
+Main :
+   run_17227351(last;ls;rls;token)
+

@@ -1,0 +1,27 @@
+
+fun iter(ls,t,ts,a,dsc1,dsc2){
+  if(equal[mul[length[t],length[ls]],0]){
+    (false,decald(dsc1,notEmpty(dsc2)))
+  }else{
+    switch(staticmatch(fst[hd[t]],hd[notEmpty(dsc2)]))[
+      (0,iter(ls,tl[t],ts,a,dsc1,notEmpty(dsc2)));
+      (1,aux(ls,t,ts,a,run(snd[hd[t]],a,ts,tl[ls],
+                  add[dsc1,hd[notEmpty(dsc2)]],
+                   tl[notEmpty(dsc2)]   )));
+      (2,
+        if(equal[hd[ls],fst[hd[t]]]){
+          aux(ls,t,ts,a,run(snd[hd[t]],a,ts,tl[ls],
+                add[dsc1,[(fst[hd[t]],[])]],tl[notEmpty(dsc2)]))
+        }else{
+          iter(ls,tl[t],ts,a,dsc1,
+
+          add[addneg(fst[hd[t]],hd[notEmpty(dsc2)]),tl[notEmpty(dsc2)]])
+        }
+
+      )
+    ]
+    (exception)
+  }
+}
+
+1

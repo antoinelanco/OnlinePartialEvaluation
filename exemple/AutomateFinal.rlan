@@ -1,0 +1,154 @@
+Definition Fonction :
+ 
+
+Fonction : run_1015702267(ls,rls,token){
+   If((==,(Length,ls),0)){
+      run_613054599(rls;rls;(+,token,'AB'))
+   }Else{
+      Switch((HD,ls)):
+         Case('b') -> run_710027204((TL,ls);rls;token)
+         Default -> run_613054599(rls;rls;(+,token,'AB'))
+   }
+}
+
+
+Fonction : run_112905708(ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'B')
+   }Else{
+      run_798795169(ls;rls;(+,token,'B'))
+   }
+}
+
+
+Fonction : run_155769195(ls,rls,token){
+   If((==,(Length,ls),0)){
+      run_613054599(rls;rls;(+,token,'AB'))
+   }Else{
+      Switch((HD,ls)):
+         Case('c') -> run_391026434((TL,ls);rls;token)
+         Default -> run_613054599(rls;rls;(+,token,'AB'))
+   }
+}
+
+
+Fonction : run_260943510(ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'B')
+   }Else{
+      run_613054599(ls;rls;(+,token,'B'))
+   }
+}
+
+
+Fonction : run_33530797(ls,rls,token){
+   If((==,(Length,ls),0)){
+      Exception
+   }Else{
+      Switch((HD,ls)):
+         Case('a') -> run_888418826((TL,ls);rls;token)
+         Case('b') -> run_517945927((TL,ls);rls;token)
+         Default -> Exception
+   }
+}
+
+
+Fonction : run_391026434(ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'ABBC')
+   }Else{
+      run_798795169(ls;rls;(+,token,'ABBC'))
+   }
+}
+
+
+Fonction : run_414884717(ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'AB')
+   }Else{
+      Switch((HD,ls)):
+         Case('b') -> run_155769195((TL,ls);ls;token)
+         Default -> run_33530797(ls;rls;(+,token,'AB'))
+   }
+}
+
+
+Fonction : run_480285905(ls,rls,token){
+   If((==,(Length,ls),0)){
+      Exception
+   }Else{
+      Switch((HD,ls)):
+         Case('b') -> run_978350764((TL,ls);rls;token)
+         Default -> Exception
+   }
+}
+
+
+Fonction : run_517945927(ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'B')
+   }Else{
+      run_33530797(ls;rls;(+,token,'B'))
+   }
+}
+
+
+Fonction : run_613054599(ls,rls,token){
+   If((==,(Length,ls),0)){
+      Exception
+   }Else{
+      Switch((HD,ls)):
+         Case('a') -> run_480285905((TL,ls);rls;token)
+         Case('b') -> run_260943510((TL,ls);rls;token)
+         Default -> Exception
+   }
+}
+
+
+Fonction : run_710027204(ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'AB')
+   }Else{
+      Switch((HD,ls)):
+         Case('b') -> run_155769195((TL,ls);ls;token)
+         Default -> run_798795169(ls;rls;(+,token,'AB'))
+   }
+}
+
+
+Fonction : run_798795169(ls,rls,token){
+   If((==,(Length,ls),0)){
+      run_613054599(rls;rls;(+,token,'AB'))
+   }Else{
+      Switch((HD,ls)):
+         Case('a') -> run_1015702267((TL,ls);rls;token)
+         Case('b') -> run_112905708((TL,ls);rls;token)
+         Default -> run_613054599(rls;rls;(+,token,'AB'))
+   }
+}
+
+
+Fonction : run_888418826(ls,rls,token){
+   If((==,(Length,ls),0)){
+      Exception
+   }Else{
+      Switch((HD,ls)):
+         Case('b') -> run_414884717((TL,ls);rls;token)
+         Default -> Exception
+   }
+}
+
+
+Fonction : run_978350764(ls,rls,token){
+   If((==,(Length,ls),0)){
+      (+,token,'AB')
+   }Else{
+      Switch((HD,ls)):
+         Case('b') -> run_155769195((TL,ls);ls;token)
+         Default -> run_613054599(ls;rls;(+,token,'AB'))
+   }
+}
+
+Main :
+   run_33530797(ls;rls;token)
+

@@ -9,6 +9,7 @@ type token =
   | SND
   | SEMI
   | REV
+  | OR
   | MULT
   | LITINT of (int)
   | LENGTH
@@ -33,6 +34,7 @@ type token =
   | COMMA
   | BEGIN
   | BB
+  | AND
   | ADD
 
 (* This exception is raised by the monolithic API functions. *)

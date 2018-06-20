@@ -18,6 +18,7 @@
 %token EXISTS FIND
 %token EXCEP
 %token SWITCH
+%token OR AND
 %token FUN
 %token EOF
 
@@ -66,6 +67,8 @@ expr:
 | SWITCH; BEGIN; e1=expr; END; BB; es=separated_nonempty_list(SEMI, case); EB; BEGIN; e2=expr; END { Switch (e1,es,e2) }
 | BB; t=separated_list(SEMI,expr); EB { Tab(t) }
 | BEGIN; e1=expr; COMMA; e2=expr; END { Pair(e1,e2) }
+| OR; BB; e1=expr; COMMA; e2=expr; EB { OR(e1,e2) }
+| AND; BB; e1=expr; COMMA; e2=expr; EB { AND(e1,e2) }
 
 case:
 | BEGIN; v1=vall; COMMA; e2=expr; END { (v1,e2) }

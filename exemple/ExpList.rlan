@@ -1,0 +1,11 @@
+Definition Fonction :
+
+Main :
+   Switch(x):
+      Case('a') -> 9
+      Case('b') -> 81
+      Case('c') -> 729
+      Case('d') -> 6561
+      Case('e') -> 59049
+      Case('f') -> 531441
+      Default -> Exception

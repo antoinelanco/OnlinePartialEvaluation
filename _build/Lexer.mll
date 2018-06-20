@@ -24,6 +24,8 @@
         "add",      ADD;
         "mul",      MULT;
         "sub",      SUB;
+        "and",      AND;
+        "or",       OR;
         "true",     TRUE;
         "false",    FALSE;
         "exception",EXCEP;

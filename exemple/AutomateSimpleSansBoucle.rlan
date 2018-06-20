@@ -1,0 +1,27 @@
+Definition Fonction :
+ 
+
+Fonction : run_213859364(last,ls,rls,token){
+   Switch((HD,ls)):
+      Case('b') -> run_22378273((TL,ls);ls;token)
+      Default -> 'B'
+}
+
+
+Fonction : run_22378273(ls,rls,token){
+   Switch((HD,ls)):
+      Case('b') -> run_22378273((TL,ls);ls;token)
+      Default -> 'B'
+}
+
+
+Fonction : run_922624515(last,ls,rls,token){
+   Switch((HD,ls)):
+      Case('a') -> 'A'
+      Case('b') -> run_213859364(last;(TL,ls);rls;token)
+      Default -> Exception
+}
+
+Main :
+   run_922624515(last;ls;rls;token)
+

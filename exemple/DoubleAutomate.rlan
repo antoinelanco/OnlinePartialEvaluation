@@ -1,0 +1,14 @@
+Definition Fonction :
+ 
+
+Fonction : run_442432330(last,ls,rls,token){
+   Switch((HD,ls)):
+      Case('a') -> 'A'
+      Case('b') -> 'B'
+      Case('c') -> 'C'
+      Default -> Exception
+}
+
+Main :
+   run_442432330(last;ls;rls;token)
+
