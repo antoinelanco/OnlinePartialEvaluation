@@ -25,6 +25,7 @@
         "add",      ADD;
         "mul",      MULT;
         "sub",      SUB;
+        "div",      DIV;
         "and",      AND;
         "or",       OR;
         "true",     TRUE;
@@ -38,7 +39,7 @@
       with Not_found -> IDENT(s)
 
 
-# 42 "Lexer.ml"
+# 43 "Lexer.ml"
 let __ocaml_lex_tables = {
   Lexing.lex_base =
    "\000\000\242\255\243\255\244\255\245\255\246\255\247\255\248\255\
@@ -160,74 +161,74 @@ let rec token lexbuf =
 and __ocaml_lex_token_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
-# 47 "Lexer.mll"
+# 48 "Lexer.mll"
       ( token lexbuf )
-# 166 "Lexer.ml"
+# 167 "Lexer.ml"
 
   | 1 ->
-# 49 "Lexer.mll"
+# 50 "Lexer.mll"
       ( id_or_keyword (lexeme lexbuf) )
-# 171 "Lexer.ml"
+# 172 "Lexer.ml"
 
   | 2 ->
-# 51 "Lexer.mll"
+# 52 "Lexer.mll"
       ( LITINT (int_of_string (lexeme lexbuf)) )
-# 176 "Lexer.ml"
+# 177 "Lexer.ml"
 
   | 3 ->
-# 53 "Lexer.mll"
+# 54 "Lexer.mll"
       ( DCOTE )
-# 181 "Lexer.ml"
+# 182 "Lexer.ml"
 
   | 4 ->
-# 55 "Lexer.mll"
+# 56 "Lexer.mll"
       ( BEGIN )
-# 186 "Lexer.ml"
+# 187 "Lexer.ml"
 
   | 5 ->
-# 57 "Lexer.mll"
+# 58 "Lexer.mll"
       ( END )
-# 191 "Lexer.ml"
+# 192 "Lexer.ml"
 
   | 6 ->
-# 59 "Lexer.mll"
+# 60 "Lexer.mll"
       ( FB )
-# 196 "Lexer.ml"
+# 197 "Lexer.ml"
 
   | 7 ->
-# 61 "Lexer.mll"
+# 62 "Lexer.mll"
       ( FE )
-# 201 "Lexer.ml"
+# 202 "Lexer.ml"
 
   | 8 ->
-# 63 "Lexer.mll"
+# 64 "Lexer.mll"
       ( BB )
-# 206 "Lexer.ml"
+# 207 "Lexer.ml"
 
   | 9 ->
-# 65 "Lexer.mll"
+# 66 "Lexer.mll"
       ( EB )
-# 211 "Lexer.ml"
+# 212 "Lexer.ml"
 
   | 10 ->
-# 67 "Lexer.mll"
+# 68 "Lexer.mll"
       ( COMMA )
-# 216 "Lexer.ml"
+# 217 "Lexer.ml"
 
   | 11 ->
-# 69 "Lexer.mll"
+# 70 "Lexer.mll"
       ( SEMI )
-# 221 "Lexer.ml"
+# 222 "Lexer.ml"
 
   | 12 ->
-# 71 "Lexer.mll"
+# 72 "Lexer.mll"
       ( EOF )
-# 226 "Lexer.ml"
+# 227 "Lexer.ml"
 
   | 13 ->
-# 73 "Lexer.mll"
+# 74 "Lexer.mll"
       (raise (Error (sprintf "Unknow Token %s" (lexeme lexbuf))))
-# 231 "Lexer.ml"
+# 232 "Lexer.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf;
       __ocaml_lex_token_rec lexbuf __ocaml_lex_state

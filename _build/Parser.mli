@@ -30,6 +30,7 @@ type token =
   | END
   | ELSE
   | EB
+  | DIV
   | DCOTE
   | COMMA
   | BEGIN

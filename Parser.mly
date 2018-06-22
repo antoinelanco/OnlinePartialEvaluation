@@ -10,7 +10,7 @@
 %token <int> LITINT
 %token IF ELSE
 %token TRUE FALSE
-%token ADD MULT SUB EQ
+%token ADD MULT DIV SUB EQ
 %token TL HD LENGTH REV
 %token BB EB FB FE
 %token DCOTE
@@ -75,6 +75,7 @@ case:
 
 op:
 | MULT   { Mult }
+| DIV    { Div }
 | ADD    { Add }
 | SUB    { Sub }
 | EQ     { Eq }

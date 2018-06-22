@@ -24,6 +24,7 @@
         "add",      ADD;
         "mul",      MULT;
         "sub",      SUB;
+        "div",      DIV;
         "and",      AND;
         "or",       OR;
         "true",     TRUE;

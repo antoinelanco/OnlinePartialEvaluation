@@ -32,6 +32,7 @@ and case = vall * expr
 and op =
   | Add
   | Mult
+  | Div
   | Sub
   | Eq
   | TL
@@ -118,6 +119,7 @@ and print_val = function
 and print_op = function
   | Add -> "+"
   | Mult -> "*"
+  | Div  -> "/"
   | Sub -> "-"
   | Eq -> "=="
   | TL -> "TL"

@@ -397,6 +397,7 @@ and prim o rs : SourceAst.expr =
       | Add,Const(CVal(e2)),Tab(e1)          -> Tab(Const(CVal(e2))::e1)
       | Add,Pair(e2,e3),Tab(e1)              -> Tab(Pair(e2,e3)::e1)
       | Mult,Const(IVal(e1)),Const(IVal(e2)) -> Const(IVal(e1*e2))
+      | Div,Const(IVal(e1)),Const(IVal(e2)) -> Const(IVal(e1/e2))
       | Sub,Const(IVal(e1)),Const(IVal(e2))  -> Const(IVal(e1-e2))
       | Eq,Const(IVal(e1)),Const(IVal(e2))   -> Const(BVal (e1 == e2))
       | Eq,Const(BVal(e1)),Const(BVal(e2))   -> Const(BVal (e1 == e2))
