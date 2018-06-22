@@ -1,0 +1,157 @@
+Definition Fonction :
+
+
+Fonction : aux_168525315(ls,res){
+   If((Fst,res)){
+      (true,((Fst,(Snd,res)),(Snd,(Snd,res))))
+   }Else{
+      (false,decald_0((dsc1,notEmpty_0(dsc2))))
+   }
+}
+
+
+Fonction : aux_22903928(ls,res){
+   If((Fst,res)){
+      (true,((Fst,(Snd,res)),(Snd,(Snd,res))))
+   }Else{
+      (false,decald_0((dsc1,notEmpty_0(dsc2))))
+   }
+}
+
+
+Fonction : aux_426729183(ls,res){
+   If((Fst,res)){
+      (true,((Fst,(Snd,res)),(Snd,(Snd,res))))
+   }Else{
+      iter_22903928((Fst,(Snd,res));(Snd,(Snd,res));ls)
+   }
+}
+
+
+Fonction : aux_720937039(ls,res){
+   If((Fst,res)){
+      (true,((Fst,(Snd,res)),(Snd,(Snd,res))))
+   }Else{
+      (false,decald_0((dsc1,notEmpty_0(dsc2))))
+   }
+}
+
+
+Fonction : aux_728926053(ls,res){
+   If((Fst,res)){
+      (true,((Fst,(Snd,res)),(Snd,(Snd,res))))
+   }Else{
+      (false,decald_0((dsc1,notEmpty_0(dsc2))))
+   }
+}
+
+
+Fonction : decald_0(p){
+   If((==,(Length,(Fst,p)),0)){
+      p
+   }Else{
+      ((REV,(TL,(REV,(Fst,p)))),(+,(HD,(REV,(Fst,p))),(Snd,p)))
+   }
+}
+
+
+Fonction : iter_22903928(dsc1,dsc2,ls){
+   If((==,(Length,ls),0)){
+      (false,decald_0((dsc1,notEmpty_0(dsc2))))
+   }Else{
+      Switch(staticmatch_270041647((HD,notEmpty_0(dsc2)))):
+         Case(0) -> (false,decald_0((dsc1,notEmpty_0(dsc2))))
+         Case(1) -> aux_22903928(ls;iter_728926053((+,dsc1,(HD,notEmpty_0(dsc2)));(TL,notEmpty_0(dsc2));(TL,ls)))
+         Case(2) -> If((==,(HD,ls),'a')){
+            aux_22903928(ls;iter_728926053((+,dsc1,('a',Tab()));(TL,notEmpty_0(dsc2));(TL,ls)))
+         }Else{
+            (false,decald_0((dsc1,notEmpty_0(dsc2))))
+         }
+         Default -> Exception
+   }
+}
+
+
+Fonction : iter_481000198(ls){
+   If((==,(Length,ls),0)){
+      (false,(Tab[('a',Tab())],Tab[('d',Tab());('_',Tab())]))
+   }Else{
+      If((==,(HD,ls),'c')){
+         (true,(Tab[('a',Tab());('d',Tab());('c',Tab())],Tab[]))
+      }Else{
+         (false,(Tab[('a',Tab())],Tab[('d',Tab());('_',Tab('c'))]))
+      }
+   }
+}
+
+
+Fonction : iter_568925474(ls){
+   If((==,(Length,ls),0)){
+      (false,(Tab[],Tab[('_',Tab())]))
+   }Else{
+      If((==,(HD,ls),'a')){
+         aux_426729183(ls;iter_653569734((TL,ls)))
+      }Else{
+         (false,(Tab[],Tab[('_',Tab('a'))]))
+      }
+   }
+}
+
+
+Fonction : iter_653569734(ls){
+   If((==,(Length,ls),0)){
+      (false,(Tab[],Tab[('a',Tab());('_',Tab())]))
+   }Else{
+      If((==,(HD,ls),'d')){
+         aux_168525315(ls;iter_481000198((TL,ls)))
+      }Else{
+         (false,(Tab[],Tab[('a',Tab());('_',Tab('d'))]))
+      }
+   }
+}
+
+
+Fonction : iter_720937039(dsc1,dsc2,ls){
+   If((==,(Length,ls),0)){
+      (false,decald_0((dsc1,notEmpty_0(dsc2))))
+   }Else{
+      Switch(staticmatch_627782137((HD,notEmpty_0(dsc2)))):
+         Case(0) -> (false,decald_0((dsc1,notEmpty_0(dsc2))))
+         Case(1) -> aux_720937039(ls;(true,(dsc1,dsc2)))
+         Case(2) -> If((==,(HD,ls),'c')){
+            aux_720937039(ls;(true,(dsc1,dsc2)))
+         }Else{
+            (false,decald_0((dsc1,notEmpty_0(dsc2))))
+         }
+         Default -> Exception
+   }
+}
+
+
+Fonction : iter_728926053(dsc1,dsc2,ls){
+   If((==,(Length,ls),0)){
+      (false,decald_0((dsc1,notEmpty_0(dsc2))))
+   }Else{
+      Switch(staticmatch_486196102((HD,notEmpty_0(dsc2)))):
+         Case(0) -> (false,decald_0((dsc1,notEmpty_0(dsc2))))
+         Case(1) -> aux_728926053(ls;iter_720937039((+,dsc1,(HD,notEmpty_0(dsc2)));(TL,notEmpty_0(dsc2));(TL,ls)))
+         Case(2) -> If((==,(HD,ls),'b')){
+            aux_728926053(ls;iter_720937039((+,dsc1,('b',Tab()));(TL,notEmpty_0(dsc2));(TL,ls)))
+         }Else{
+            (false,decald_0((dsc1,notEmpty_0(dsc2))))
+         }
+         Default -> Exception
+   }
+}
+
+
+Fonction : notEmpty_0(d){
+   If((==,(Length,d),0)){
+      Tab[('_',Tab())]
+   }Else{
+      d
+   }
+}
+
+Main :
+   iter_568925474(ls)
