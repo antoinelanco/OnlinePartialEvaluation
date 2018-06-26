@@ -6,4 +6,5 @@ fun g(a,b,c){
   (add[a,add[b,c]],add[a,add[b,c]])
 }
 
+
 g(i,j,k)

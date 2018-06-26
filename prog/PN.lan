@@ -42,7 +42,7 @@ fun run(s,a,t,ls,dsc1,dsc2){
 }
 
 fun iter(ls,t,ts,a,dsc1,dsc2){
-  if(or[equal[length[t],0],equal[length[ls],0]]){
+  #if(or[equal[length[t],0],equal[length[ls],0]]){
   if(equal[length[t],0]){
     (false,decald((dsc1,notEmpty(dsc2))))
   }else{

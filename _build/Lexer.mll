@@ -46,7 +46,9 @@ let alpha = ['a'-'z' 'A'-'Z']
 let ident = (alpha | '_') (alpha | '_' | '\'' | digit)*
 
 rule token = parse
-  | [' ' '\t' '\r' '|']+
+  | '#'[^ '\n']*'\n'
+      { new_line lexbuf;token lexbuf }
+  | [' ' '\t' '\r' ]+
       { token lexbuf }
   | '\n'
       { new_line lexbuf; token lexbuf}
