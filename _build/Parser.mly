@@ -20,6 +20,7 @@
 %token SWITCH
 %token OR AND
 %token FUN
+%token LET AFF IN
 %token EOF
 
 %start prog
@@ -28,13 +29,12 @@
 %%
 
 
+prog:
+| f=progs; e=expr; EOF { (f, e) }
+
 str:
 | DCOTE; id=IDENT; DCOTE { id }
 
-
-prog:
-| f=progs; e=expr; EOF
-{ (f, e) }
 
 progs:
 | (* empty *) { Func_Tbl.empty }
@@ -69,6 +69,7 @@ expr:
 | BEGIN; e1=expr; COMMA; e2=expr; END { Pair(e1,e2) }
 | OR; BB; e1=expr; COMMA; e2=expr; EB { OR(e1,e2) }
 | AND; BB; e1=expr; COMMA; e2=expr; EB { AND(e1,e2) }
+| LET; id=IDENT; AFF; e1=expr; IN e2=expr { Let(Var(id),e1,e2) }
 
 case:
 | BEGIN; v1=vall; COMMA; e2=expr; END { (v1,e2) }

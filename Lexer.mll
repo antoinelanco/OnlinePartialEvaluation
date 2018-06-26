@@ -32,6 +32,8 @@
         "exception",EXCEP;
         "switch",   SWITCH;
         "fun",      FUN;
+        "let",      LET;
+        "in",       IN;
       ] ;
     fun s ->
       try  Hashtbl.find h s
@@ -44,8 +46,10 @@ let alpha = ['a'-'z' 'A'-'Z']
 let ident = (alpha | '_') (alpha | '_' | '\'' | digit)*
 
 rule token = parse
-  | [' ' '\t' '\r' '\n' '|']+
+  | [' ' '\t' '\r' '|']+
       { token lexbuf }
+  | '\n'
+      { new_line lexbuf; token lexbuf}
   | ident
       { id_or_keyword (lexeme lexbuf) }
   | digit+
@@ -68,6 +72,8 @@ rule token = parse
       { COMMA }
   | ";"
       { SEMI }
+  | "<-"
+      { AFF }
   | eof
       { EOF }
   | _

@@ -25,6 +25,7 @@ and expr =
   | Tab    of expr list
   | AND    of expr * expr
   | OR     of expr * expr
+  | Let    of expr * expr * expr
 
 
 and case = vall * expr
@@ -54,13 +55,7 @@ let rec print_prog p =
 
 and print_fdef fd = Func_Tbl.fold (fun key el acc ->
     let (arg_list,exp) = el in
-    let args_lists =
-      let tmp = List.fold_left(fun ac i -> sprintf "%s,%s" ac i) "" arg_list in
-      let taille = String.length tmp in
-      if taille != 0
-      then String.sub tmp 1 (taille-1)
-      else tmp
-    in
+    let args_lists = String.concat "," arg_list in
 
     sprintf "%s\n\nFonction : %s(%s){\n%s\n}\n" acc key args_lists (print_exprv2 "   " "   " exp) ) fd ""
 
@@ -69,13 +64,16 @@ and print_exprv2 space now = function
   | Const(v)      -> sprintf "%s%s" now (print_val v)
   | Var(s)        -> sprintf "%s%s" now s
   | Prim(o,es)    -> sprintf "%s(%s)" now (List.fold_left(fun ac i -> sprintf "%s,%s" ac (print_exprv2 space "" i)) (print_op o) es)
-  | Apply(s,es)   -> sprintf "%s%s(%s)" now s (print_list_expr es)
+  | Apply(s,es)   -> sprintf "%s%s(%s)" now s (String.concat "," (List.map print_expr es))
   | Find(e1,e2)   -> sprintf "%sFind(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
   | Exists(e1,e2) -> sprintf "%sExists(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
   | Pair(e1,e2)   -> sprintf "%s(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
   | OR(e1,e2)     -> sprintf "%s%s OR %s" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
   | AND(e1,e2)    -> sprintf "%s%s AND %s" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
-  | Tab(es)       -> sprintf "%sTab[%s]" now (print_list_expr es)
+  | Tab(es)       -> sprintf "%sTab[%s]" now (String.concat ";" (List.map print_expr es))
+  | Let(v,e1,e2)  -> sprintf "\n%sLet %s <- %s in\n%s%s" space (print_expr v)
+                        (print_exprv2 (space^"   ") "" e1) space (print_exprv2 (space^"   ") "" e2)
+
   | Switch(e1,es,e2) -> sprintf "%sSwitch(%s):\n%s%sDefault -> %s"
                           now (print_exprv2 (space^"   ") "" e1) (print_case es (space^"   "))
                           (space^"   ") (print_exprv2 (space^"   ") "" e2)
@@ -101,14 +99,16 @@ and print_expr = function
   | Var(s)        -> s
   | Prim(o,es)    -> sprintf "(%s)" (List.fold_left(fun ac i -> sprintf "%s,%s" ac (print_expr i)) (print_op o) es)
   | If(e0,e1,e2)  -> sprintf "If(%s)\n(%s)\n(%s)" (print_expr e0) (print_expr e1) (print_expr e2)
-  | Apply(s,es)   -> sprintf "%s(%s)" s (print_list_expr es)
+  | Apply(s,es)   -> sprintf "%s(%s)" s (String.concat "," (List.map print_expr es))
   | Exists(e1,e2) -> sprintf "Exists(%s,%s)" (print_expr e1) (print_expr e2)
   | Find(e1,e2)   -> sprintf "Find(%s,%s)" (print_expr e1) (print_expr e2)
   | Switch(e1,es,e2) -> sprintf "Switch(%s):\n%sDefault -> %s" (print_expr e1) (print_case es "   ") (print_expr e2)
-  | Pair(e1,e2)   -> sprintf "(%s,%s)" (print_expr e1) (print_expr e2)
-  | OR(e1,e2)     -> sprintf "%s OR %s" (print_expr e1) (print_expr e2)
-  | AND(e1,e2)     -> sprintf "%s AND %s" (print_expr e1) (print_expr e2)
-  | Tab(es)       -> sprintf "Tab(%s)" (print_list_expr es)
+  | Pair(e1,e2)  -> sprintf "(%s,%s)" (print_expr e1) (print_expr e2)
+  | OR(e1,e2)    -> sprintf "%s OR %s" (print_expr e1) (print_expr e2)
+  | AND(e1,e2)   -> sprintf "%s AND %s" (print_expr e1) (print_expr e2)
+  | Tab(es)      -> sprintf "Tab(%s)" (String.concat ";" (List.map print_expr es))
+  | Let(v,e1,e2) -> sprintf "Let %s <- %s in\n%s" (print_expr v) (print_expr e1)
+                                                                 (print_expr e2)
 
 
 and print_val = function
@@ -129,8 +129,6 @@ and print_op = function
   | Snd -> "Snd"
   | Length -> "Length"
   | IsPair -> "IsPair"
-
-and print_list_expr es = String.concat ";" (List.map print_expr es)
 
 and merge_vars k v1 v2 =
   match v1, v2 with

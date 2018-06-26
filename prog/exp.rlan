@@ -1,5 +1,25 @@
 Definition Fonction :
  
 Main :
-   (*,(*,x,(*,(*,x,1),(*,x,1))),(*,x,(*,(*,x,1),(*,x,1))))
+
+   Let y <- 
+      Let y <- 
+         Let y <- 
+            Let y <- 
+               Let y <- 
+                  Let y <- 
+                     Let y <- 
+                        Let y <- 
+                           Let y <- 
+                              Let y <- (*,x,x) in
+                              (*,y,y) in
+                           (*,y,y) in
+                        (*,y,y) in
+                     (*,x,(*,y,y)) in
+                  (*,y,y) in
+               (*,x,(*,y,y)) in
+            (*,y,y) in
+         (*,x,(*,y,y)) in
+      (*,x,(*,y,y)) in
+   (*,y,y)
 

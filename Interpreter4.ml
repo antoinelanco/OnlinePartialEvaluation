@@ -4,6 +4,7 @@ let rec eval (fdefs,main) : SourceAst.prog = (* Prog -> Prog *)
   eval' fdefs main Env.empty Func_Tbl.empty
 
 and eval' fdefs main env state : SourceAst.prog = (*Eval*)
+  (* Printf.printf "%s\n" (print_expr main); *)
   if ifExpProf main
   then (state,Exception)
   else
@@ -18,11 +19,21 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
           | None -> (state,Var s)
         end
 
+      | Let(v,e1,e2) ->
+        let (fd1,ma1) = eval' fdefs e1 env state in
+        if inLineLet ma1
+        then
+          let new_env = Env.add v ma1 env in
+          eval' fdefs e2 new_env fd1
+
+        else
+          let (fd2,ma2) = eval' fdefs e2 env fd1 in
+          (fd2,Let(v,ma1,ma2))
+
       | Pair(e1,e2) ->
         let (fd1,ma1) = eval' fdefs e1 env state in
-        let (fd2,ma2) = eval' fdefs e2 env state in
-        let res = (Func_Tbl.merge merge_vars fd1 fd2) in
-        (res,Pair(ma1,ma2))
+        let (fd2,ma2) = eval' fdefs e2 env fd1 in
+        (fd2,Pair(ma1,ma2))
 
       | Tab(es) ->
         let (fd,ma) = List.fold_left
@@ -40,22 +51,19 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
         then if val_to_bool ma1
              then (fd1,Const (BVal true))
              else
-             let (fd2,ma2) = eval' fd1 e2 env state in
+             let (fd2,ma2) = eval' fdefs e2 env fd1 in
              if isVal ma2
              then if val_to_bool ma2
                   then (fd2,Const (BVal true))
                   else (fd2,Const (BVal false))
              else (fd2,ma2)
         else
-        let (fd2,ma2) = eval' fd1 e2 env state in
+        let (fd2,ma2) = eval' fdefs e2 env fd1 in
         if isVal ma2
         then if val_to_bool ma2
              then (fd2,Const (BVal true))
              else (fd2,Const (BVal false))
         else (fd2,OR(ma1,ma2))
-
-
-
 
       | AND(e1,e2) -> (state,AND(e1,e2)) (*Afaire*)
 
@@ -66,7 +74,7 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
                let (fd,ma) = eval' fdefs e env acc_fd in
                (fd,acc_ma@[ma]) ) (state,[]) es
         in
-        if allIsVal ma
+        if allIsValAndVar ma
         then (fd,prim o ma)
         else
 
@@ -343,6 +351,8 @@ and symbol env : SourceAst.expr -> SourceAst.expr = function
   | Apply(x,es) -> Apply (x,List.map(fun i -> symbol env i ) es)
   | Find (e1,e2) -> Find(symbol env e1,symbol env e2)
   | Exists (e1,e2) -> Exists(symbol env e1,symbol env e2)
+  | Tab(es) -> Tab(List.map(fun i -> symbol env i ) es)
+  | Pair(e1,e2) -> Pair(symbol env e1,symbol env e2)
   | x -> x
 
 and findif expr_list : (SourceAst.expr * SourceAst.Env.key) option =
@@ -355,6 +365,7 @@ and findif expr_list : (SourceAst.expr * SourceAst.Env.key) option =
 and existsif : SourceAst.expr -> bool = function
   | Switch _ | If _ -> true
   | Prim(_,es) -> List.exists(fun i -> existsif i ) es
+  | Let(_,e1,e2) -> existsif e1 || existsif e2
   | _ -> false
 
 and prim o rs : SourceAst.expr =
@@ -378,6 +389,7 @@ and prim o rs : SourceAst.expr =
       | Snd,Pair(_,e2)       -> e2
       | IsPair,Pair(_,_)     -> Const(BVal true)
       | IsPair,_             -> Const(BVal false)
+      | op,Var e1-> Prim(op,[Var e1])
       | e1,e2 -> failwith (Printf.sprintf "Err0r match bin0p %s,%s"
                              (print_op e1) (print_expr e2))
     end
@@ -386,7 +398,9 @@ and prim o rs : SourceAst.expr =
     let el2 = List.hd (List.tl rs) in
     begin
       match o,el1,el2 with
-      | Add,Const(IVal(e1)),Const(IVal(e2))  -> Const(IVal(e1+e2))
+      | Add,Const(IVal 0),Var e    -> Var e
+      | Add,Var e,Const(IVal 0)    -> Var e
+      | Add,Const(IVal e1),Const(IVal e2)  -> Const(IVal(e1+e2))
       | Add,Tab(e1),Tab(e2)                  -> Tab(e1@e2)
       | Add,Tab(e1),Const(IVal(e2))          -> Tab(e1@[Const(IVal(e2))])
       | Add,Tab(e1),Const(BVal(e2))          -> Tab(e1@[Const(BVal(e2))])
@@ -396,13 +410,21 @@ and prim o rs : SourceAst.expr =
       | Add,Const(BVal(e2)),Tab(e1)          -> Tab(Const(BVal(e2))::e1)
       | Add,Const(CVal(e2)),Tab(e1)          -> Tab(Const(CVal(e2))::e1)
       | Add,Pair(e2,e3),Tab(e1)              -> Tab(Pair(e2,e3)::e1)
-      | Mult,Const(IVal(e1)),Const(IVal(e2)) -> Const(IVal(e1*e2))
+      | Mult,Const(IVal 1),Var e -> Var e
+      | Mult,Const(IVal 0),Var _ -> Const(IVal 0)
+      | Mult,Var e,Const(IVal 1) -> Var e
+      | Mult,Var _,Const(IVal 0) -> Const(IVal 0)
+      | Mult,Const(IVal e1),Const(IVal e2) -> Const(IVal(e1*e2))
       | Div,Const(IVal(e1)),Const(IVal(e2)) -> Const(IVal(e1/e2))
       | Sub,Const(IVal(e1)),Const(IVal(e2))  -> Const(IVal(e1-e2))
       | Eq,Const(IVal(e1)),Const(IVal(e2))   -> Const(BVal (e1 == e2))
       | Eq,Const(BVal(e1)),Const(BVal(e2))   -> Const(BVal (e1 == e2))
+      | Eq,Var e,Const(BVal true) -> Var e
+      | Eq,Const(BVal true),Var e -> Var e
       | Eq,Tab(e1),Tab(e2)                   -> Const(BVal (e1 = e2))
       | Eq,Const(CVal(e1)),Const(CVal(e2))   -> Const(BVal (e1 = e2))
+      | op,Var e1,e2 -> Prim(op,[Var e1;e2])
+      | op,e1,Var e2 -> Prim(op,[e1;Var e2])
       | e1,e2,e3 -> failwith (Printf.sprintf "Err0r match bin0p %s,%s,%s"
                                 (print_op e1) (print_expr e2) (print_expr e3))
     end
@@ -414,7 +436,7 @@ and ifExpProf : SourceAst.expr -> bool = function
   | Prim(_,es) | Apply(_,es) | Tab es -> List.exists(fun i -> ifExpProf i ) es
   | If (e1,e2,e3)   -> ifExpProf e1 || (ifExpProf e2 && ifExpProf e3)
   | Find (e1,e2) | Exists (e1,e2) | Pair(e1,e2) | AND(e1,e2) | OR(e1,e2)
-                  -> ifExpProf e1 || ifExpProf e2
+                  | Let(_,e1,e2) -> ifExpProf e1 || ifExpProf e2
   | Switch(e1,_,_)  -> ifExpProf e1
 
 
@@ -434,6 +456,20 @@ and allIsVal (es: SourceAst.expr list) : bool =
 
 and isVal : SourceAst.expr -> bool  = function
   | Const _ -> true
+  | Tab es -> allIsVal es
+  | Pair (e1,e2) -> isVal e1 && isVal e2
+  | _ -> false
+
+
+and allIsValAndVar (es: SourceAst.expr list) : bool =
+  List.fold_left  (fun acc -> function
+      | Const _ | Var _ -> acc
+      | Tab es when allIsValAndVar es -> acc
+      | Pair (e1,e2) when inLineLet e1 && inLineLet e2 -> acc
+      | _ -> false ) true es
+
+and inLineLet : SourceAst.expr -> bool  = function
+  | Const _ | Var _ -> true
   | Tab es -> allIsVal es
   | Pair (e1,e2) -> isVal e1 && isVal e2
   | _ -> false

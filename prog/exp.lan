@@ -1,17 +1,13 @@
-fun aux (y,x,b){
-  if(b){
-    mul[y,y]
-  }else{
-    mul[x,mul[y,y]]
-  }
-}
 fun exp (x,n){
   if(equal[n,0]){
     1
   }else{
-    aux(exp(x,div[n,2]),x,equal[mul[2,div[n,2]],n])
+    let y <- exp(x,div[n,2]) in
+    if(equal[mul[2,div[n,2]],n]){
+      mul[y,y]
+    }else{
+      mul[x,mul[y,y]]
+    }
   }
 }
-
-
-exp(x,6)
+exp(x,2134)
