@@ -72,7 +72,7 @@ and print_exprv2 space now = function
   | AND(e1,e2)    -> sprintf "%s%s AND %s" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
   | Tab(es)       -> sprintf "%sTab[%s]" now (String.concat ";" (List.map print_expr es))
   | Let(v,e1,e2)  -> sprintf "\n%sLet %s <- %s in\n%s%s" space (print_expr v)
-                        (print_exprv2 (space^"   ") "" e1) space (print_exprv2 (space^"   ") "" e2)
+                       (print_exprv2 (space^"   ") "" e1) space (print_exprv2 (space^"   ") "" e2)
 
   | Switch(e1,es,e2) -> sprintf "%sSwitch(%s):\n%s%sDefault -> %s"
                           now (print_exprv2 (space^"   ") "" e1) (print_case es (space^"   "))
@@ -108,7 +108,7 @@ and print_expr = function
   | AND(e1,e2)   -> sprintf "%s AND %s" (print_expr e1) (print_expr e2)
   | Tab(es)      -> sprintf "Tab(%s)" (String.concat ";" (List.map print_expr es))
   | Let(v,e1,e2) -> sprintf "Let %s <- %s in\n%s" (print_expr v) (print_expr e1)
-                                                                 (print_expr e2)
+                      (print_expr e2)
 
 
 and print_val = function

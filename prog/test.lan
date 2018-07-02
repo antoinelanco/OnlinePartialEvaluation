@@ -1,10 +1,7 @@
-fun f(x,y,z){
-  g(x,y,z)
+fun f(x,n){
+  if(equal[n,1]){x}else{
+    add[x,f(x,sub[n,1])]
+  }
 }
 
-fun g(a,b,c){
-  (add[a,add[b,c]],add[a,add[b,c]])
-}
-
-
-g(i,j,k)
+f(n,find(x,[3;5;7;11;13]))

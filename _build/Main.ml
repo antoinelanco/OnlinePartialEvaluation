@@ -4,9 +4,9 @@ exception ParseErr of string
 let parseerr_string = Printf.sprintf "Token : \"%s\", Line : %d, Char : %d-%d"
 
 let set_file s =
-    if not (Filename.check_suffix s ".lan")
-    then raise (Arg.Bad "no .lan extension")
-    else s
+  if not (Filename.check_suffix s ".lan")
+  then raise (Arg.Bad "no .lan extension")
+  else s
 
 let file = set_file Sys.argv.(1)
 let c = open_in file

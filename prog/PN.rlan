@@ -1,137 +1,25 @@
 Definition Fonction :
  
-
-Fonction : decald_0(p){
-   If((==,(Length,(Fst,p)),0)){
-      p
-   }Else{
-      ((REV,(TL,(REV,(Fst,p)))),(+,(HD,(REV,(Fst,p))),(Snd,p)))
-   }
-}
-
-
-Fonction : iter_22903928(dsc1,dsc2,ls){
-   Switch(staticmatch_270041647((HD,notEmpty_0(dsc2)))):
-      Case(0) -> (false,decald_0((dsc1,notEmpty_0(notEmpty_0(dsc2)))))
-      Case(1) -> 
-      Let z <- iter_728926053((+,dsc1,(HD,notEmpty_0(dsc2))),(TL,notEmpty_0(dsc2)),(TL,ls)) in
-      If((Fst,z)){
-            (true,((Fst,(Snd,z)),(Snd,(Snd,z))))
-         }Else{
-            (false,decald_0(((Fst,(Snd,z)),notEmpty_0((Snd,(Snd,z))))))
-         }
-      Case(2) -> If((==,(HD,ls),'a')){
-
-         Let z <- iter_728926053((+,dsc1,('a',Tab())),(TL,notEmpty_0(dsc2)),(TL,ls)) in
-         If((Fst,z)){
-               (true,((Fst,(Snd,z)),(Snd,(Snd,z))))
-            }Else{
-               (false,decald_0(((Fst,(Snd,z)),notEmpty_0((Snd,(Snd,z))))))
-            }
-      }Else{
-         (false,decald_0((dsc1,notEmpty_0((+,((Fst,(HD,notEmpty_0(dsc2))),(+,(Snd,(HD,notEmpty_0(dsc2))),'a')),(TL,notEmpty_0(dsc2)))))))
-      }
-      Default -> Exception
-}
-
-
-Fonction : iter_481000198(ls){
-   If((==,(HD,ls),'c')){
-      (true,(Tab[('a',Tab());('d',Tab());('c',Tab())],Tab[]))
-   }Else{
-      (false,(Tab[('a',Tab())],Tab[('d',Tab());('_',Tab('c'))]))
-   }
-}
-
-
-Fonction : iter_568925474(ls){
+Main :
    If((==,(HD,ls),'a')){
-
-      Let z <- iter_653569734((TL,ls)) in
-      If((Fst,z)){
-            (true,((Fst,(Snd,z)),(Snd,(Snd,z))))
+      If((==,(HD,ls),'d')){
+         If((==,(HD,ls),'c')){
+            (true,(Tab[('a',Tab());('d',Tab());('c',Tab())],Tab[]))
          }Else{
-            iter_22903928((Fst,(Snd,z)),(Snd,(Snd,z)),ls)
+            (false,(Tab[],Tab[('a',Tab());('d',Tab());('_',Tab('c'))]))
          }
+      }Else{
+         If((==,(HD,ls),'b')){
+            If((==,(HD,ls),'c')){
+               (true,(Tab[('a',Tab());('b',Tab());('c',Tab())],Tab[]))
+            }Else{
+               (false,(Tab[],Tab[('a',Tab());('b',Tab());('_',Tab('c'))]))
+            }
+         }Else{
+            (false,(Tab[],Tab[('a',Tab());('_',Tab('d';'b'))]))
+         }
+      }
    }Else{
       (false,(Tab[],Tab[('_',Tab('a'))]))
    }
-}
-
-
-Fonction : iter_653569734(ls){
-   If((==,(HD,ls),'d')){
-
-      Let z <- iter_481000198((TL,ls)) in
-      If((Fst,z)){
-            (true,((Fst,(Snd,z)),(Snd,(Snd,z))))
-         }Else{
-            (false,decald_0(((Fst,(Snd,z)),notEmpty_0((Snd,(Snd,z))))))
-         }
-   }Else{
-      (false,(Tab[],Tab[('a',Tab());('_',Tab('d'))]))
-   }
-}
-
-
-Fonction : iter_720937039(dsc1,dsc2,ls){
-   Switch(staticmatch_627782137((HD,notEmpty_0(dsc2)))):
-      Case(0) -> (false,decald_0((dsc1,notEmpty_0(notEmpty_0(dsc2)))))
-      Case(1) -> 
-      Let z <- (true,((+,dsc1,(HD,notEmpty_0(dsc2))),(TL,notEmpty_0(dsc2)))) in
-      If((Fst,z)){
-            (true,((Fst,(Snd,z)),(Snd,(Snd,z))))
-         }Else{
-            (false,decald_0(((Fst,(Snd,z)),notEmpty_0((Snd,(Snd,z))))))
-         }
-      Case(2) -> If((==,(HD,ls),'c')){
-
-         Let z <- (true,((+,dsc1,('c',Tab[])),(TL,notEmpty_0(dsc2)))) in
-         If((Fst,z)){
-               (true,((Fst,(Snd,z)),(Snd,(Snd,z))))
-            }Else{
-               (false,decald_0(((Fst,(Snd,z)),notEmpty_0((Snd,(Snd,z))))))
-            }
-      }Else{
-         (false,decald_0((dsc1,notEmpty_0((+,((Fst,(HD,notEmpty_0(dsc2))),(+,(Snd,(HD,notEmpty_0(dsc2))),'c')),(TL,notEmpty_0(dsc2)))))))
-      }
-      Default -> Exception
-}
-
-
-Fonction : iter_728926053(dsc1,dsc2,ls){
-   Switch(staticmatch_486196102((HD,notEmpty_0(dsc2)))):
-      Case(0) -> (false,decald_0((dsc1,notEmpty_0(notEmpty_0(dsc2)))))
-      Case(1) -> 
-      Let z <- iter_720937039((+,dsc1,(HD,notEmpty_0(dsc2))),(TL,notEmpty_0(dsc2)),(TL,ls)) in
-      If((Fst,z)){
-            (true,((Fst,(Snd,z)),(Snd,(Snd,z))))
-         }Else{
-            (false,decald_0(((Fst,(Snd,z)),notEmpty_0((Snd,(Snd,z))))))
-         }
-      Case(2) -> If((==,(HD,ls),'b')){
-
-         Let z <- iter_720937039((+,dsc1,('b',Tab())),(TL,notEmpty_0(dsc2)),(TL,ls)) in
-         If((Fst,z)){
-               (true,((Fst,(Snd,z)),(Snd,(Snd,z))))
-            }Else{
-               (false,decald_0(((Fst,(Snd,z)),notEmpty_0((Snd,(Snd,z))))))
-            }
-      }Else{
-         (false,decald_0((dsc1,notEmpty_0((+,((Fst,(HD,notEmpty_0(dsc2))),(+,(Snd,(HD,notEmpty_0(dsc2))),'b')),(TL,notEmpty_0(dsc2)))))))
-      }
-      Default -> Exception
-}
-
-
-Fonction : notEmpty_0(d){
-   If((==,(Length,d),0)){
-      Tab[('_',Tab())]
-   }Else{
-      d
-   }
-}
-
-Main :
-   iter_568925474(ls)
 

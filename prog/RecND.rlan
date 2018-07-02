@@ -1,36 +1,33 @@
 Definition Fonction :
  
-
-Fonction : iter_160406485(ls){
+Main :
    If((==,(HD,ls),'a')){
-      If(iter_923996847((TL,ls))){
+      If(If((==,(HD,ls),'b')){
+            (==,(HD,(TL,ls)),'c')
+         }Else{
+            false
+         }){
          true
       }Else{
-         iter_532029024(ls)
+         If((==,(HD,ls),'a')){
+            If((==,(HD,ls),'b')){
+               (==,(HD,(TL,ls)),'c')
+            }Else{
+               false
+            }
+         }Else{
+            false
+         }
       }
    }Else{
-      iter_532029024(ls)
+      If((==,(HD,ls),'a')){
+         If((==,(HD,ls),'b')){
+            (==,(HD,(TL,ls)),'c')
+         }Else{
+            false
+         }
+      }Else{
+         false
+      }
    }
-}
-
-
-Fonction : iter_532029024(ls){
-   If((==,(HD,ls),'a')){
-      iter_923996847((TL,ls))
-   }Else{
-      false
-   }
-}
-
-
-Fonction : iter_923996847(ls){
-   If((==,(HD,ls),'b')){
-      (==,(HD,(TL,ls)),'c')
-   }Else{
-      false
-   }
-}
-
-Main :
-   iter_160406485(ls)
 
