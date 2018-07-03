@@ -2,24 +2,36 @@ Definition Fonction :
  
 Main :
    If((==,(HD,ls),'a')){
-      If((==,(HD,ls),'d')){
-         If((==,(HD,ls),'c')){
-            (true,(Tab[('a',Tab());('d',Tab());('c',Tab())],Tab[]))
+      If((==,(HD,ls),'b')){
+         If((==,(HD,ls),'z')){
+            (true,(Tab[('a',Tab());('b',Tab());('z',Tab())],Tab[]))
          }Else{
-            (false,(Tab[],Tab[('a',Tab());('d',Tab());('_',Tab('c'))]))
+            (false,(Tab[],Tab[('a',Tab());('b',Tab());('_',Tab('z'))]))
          }
       }Else{
-         If((==,(HD,ls),'b')){
-            If((==,(HD,ls),'c')){
-               (true,(Tab[('a',Tab());('b',Tab());('c',Tab())],Tab[]))
+         If((==,(HD,ls),'c')){
+            If((==,(HD,ls),'z')){
+               (true,(Tab[('a',Tab());('c',Tab());('z',Tab())],Tab[]))
             }Else{
-               (false,(Tab[],Tab[('a',Tab());('b',Tab());('_',Tab('c'))]))
+               (false,(Tab[],Tab[('a',Tab());('c',Tab());('_',Tab('z'))]))
             }
          }Else{
-            (false,(Tab[],Tab[('a',Tab());('_',Tab('d';'b'))]))
+            (false,(Tab[],Tab[('a',Tab());('_',Tab('b';'c'))]))
          }
       }
    }Else{
-      (false,(Tab[],Tab[('_',Tab('a'))]))
+      If((==,(HD,ls),'b')){
+         If((==,(HD,ls),'b')){
+            If((==,(HD,ls),'z')){
+               (true,(Tab[('b',Tab());('b',Tab());('z',Tab())],Tab[]))
+            }Else{
+               (false,(Tab[],Tab[('b',Tab());('b',Tab());('_',Tab('z'))]))
+            }
+         }Else{
+            (false,(Tab[],Tab[('b',Tab());('_',Tab('b'))]))
+         }
+      }Else{
+         (false,(Tab[],Tab[('_',Tab('a';'b'))]))
+      }
    }
 

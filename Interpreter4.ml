@@ -153,6 +153,11 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
             | Some n -> n
             | None -> failwith ("La fonction "^s^" n'existe pas !")
           end in
+        if allToLet es
+        then
+          let (cps,tab) = argToLet es in
+          eval' fdefs (cps (Apply(s,tab))) env state
+        else
 
         let (rs_fd,rs_ma) = List.fold_left
             (fun (acc_fd,acc_ma) e ->
@@ -168,7 +173,14 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
         let sas = Env.filter(fun _ r -> isVal r) z in
         let das = Env.filter(fun _ r -> not (isVal r)) z in
 
+        (* V1 *)
         ifdas s sas das rs_fd fdefs body
+
+        (* V2 *)
+        (* if Env.is_empty das
+        then eval' fdefs body sas state
+        else newApply s sas das state fdefs body *)
+
 
       | Exists(e1,e2) ->
 
@@ -270,7 +282,7 @@ and argToLet es =
        if toLet e
        then
          let l1 = Var (new_label ()) in
-         ((fun i -> Let(l1,e,acc_f i)),acc_t@[l1])
+         ((fun i -> Let(l1,e,acc_f i)),l1::acc_t@[l1])
        else (acc_f,acc_t@[e])
 
     ) ((fun i -> i),[]) es
@@ -469,7 +481,6 @@ and ifExpProf : SourceAst.expr -> bool = function
   | Find (e1,e2) | Exists (e1,e2) | Pair(e1,e2) | AND(e1,e2) | OR(e1,e2)
                   | Let(_,e1,e2) -> ifExpProf e1 || ifExpProf e2
   | Switch(e1,_,_)  -> ifExpProf e1
-
 
 and ifExpEnv (env : SourceAst.env) : bool =
   Env.exists (fun _ a -> ifExpProf a) env

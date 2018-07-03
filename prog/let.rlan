@@ -3,11 +3,5 @@ Definition Fonction :
 Main :
 
    Let _var_1 <- (*,a,a) in
-   Switch(_var_1):
-         Case(1) -> 1
-         Case(2) -> 2
-         Case(3) -> 3
-         Case(4) -> 4
-         Case(5) -> 5
-         Default -> Exception
+   Find(_var_1,_var_1)
 
