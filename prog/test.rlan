@@ -1,11 +1,49 @@
 Definition Fonction :
  
+
+Fonction : decald_0(p){
+   If((==,(Length,(Fst,p)),0)){
+      p
+   }Else{
+      ((REV,(TL,(REV,(Fst,p)))),(+,(HD,(REV,(Fst,p))),(Snd,p)))
+   }
+}
+
+
+Fonction : iter_223357749(ls){
+   If((==,(HD,ls),'b')){
+      (true,(Tab[],Tab[('a',Tab());('b',Tab())]))
+   }Else{
+      (false,(Tab[],Tab[('a',Tab());('_',Tab('b'))]))
+   }
+}
+
+
+Fonction : iter_585579419(ls){
+   If((==,(HD,ls),'a')){
+
+      Let z <- iter_223357749((TL,ls)) in
+      If((Fst,z)){
+            (true,decald_0(((Fst,(Snd,z)),(Snd,(Snd,z)))))
+         }Else{
+            (false,decald_0(((Fst,(Snd,z)),notEmpty_0((Snd,(Snd,z))))))
+         }
+   }Else{
+      (false,(Tab[],Tab[('_',Tab('a'))]))
+   }
+}
+
+
+Fonction : notEmpty_0(d){
+   If((==,(Length,d),0)){
+      Tab[('_',Tab())]
+   }Else{
+      d
+   }
+}
+
 Main :
-   Switch(x):
-      Case(3) -> (+,n,(+,n,n))
-      Case(5) -> (+,n,(+,n,(+,n,(+,n,n))))
-      Case(7) -> (+,n,(+,n,(+,n,(+,n,(+,n,(+,n,n))))))
-      Case(11) -> (+,n,(+,n,(+,n,(+,n,(+,n,(+,n,(+,n,(+,n,(+,n,(+,n,n))))))))))
-      Case(13) -> (+,n,(+,n,(+,n,(+,n,(+,n,(+,n,(+,n,(+,n,(+,n,(+,n,(+,n,(+,n,n))))))))))))
-      Default -> Exception
+
+   Let res <- iter_585579419(ls) in
+   (Fst,res)
 

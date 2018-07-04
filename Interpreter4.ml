@@ -34,9 +34,9 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
           begin
             match ma1 with
             | If(r1,r2,r3) -> eval' fdefs (If(r1,Let(v,r2,e2),Let(v,r3,e2))) env fd1
-            | Switch(r1,es,r2) ->
-              let new_es = List.map (fun (vall,e) -> (vall,Let(v,e,e2))) es in
-              eval' fdefs (Switch(r1,new_es,(Let(v,r2,e2)))) env fd1
+            | Switch(r1,rs,r2) ->
+              let new_rs = List.map (fun (vall,e) -> (vall,Let(v,e,e2))) rs in
+              eval' fdefs (Switch(r1,new_rs,(Let(v,r2,e2)))) env fd1
             | _ ->
               let (fd2,ma2) = eval' fdefs e2 env fd1 in
               if v = ma2
@@ -45,7 +45,7 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
 
           end
 
-        | Pair(e1,e2) ->
+      | Pair(e1,e2) ->
 
           if toLet e1 || toLet e2
           then
@@ -66,8 +66,8 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
           eval' fdefs (cps (Tab tab)) env state
         else
           let (fd,ma) = List.fold_left
-              (fun (acc_fd,acc_ma) e ->
-                 let (fd,ma) = eval' fdefs e env acc_fd in
+              (fun (acc_fd,acc_ma) element ->
+                 let (fd,ma) = eval' fdefs element env acc_fd in
                  (fd,acc_ma@[ma]) ) (state,[]) es
           in
           (fd,Tab(ma))
@@ -102,7 +102,38 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
                 else (fd2,Const (BVal false))
               else (fd2,OR(ma1,ma2))
 
-      | AND(e1,e2) -> (state,AND(e1,e2)) (*Afaire*)
+      | AND(e1,e2) ->
+
+        if toLet e1 || toLet e2
+        then
+          let (cps,tab) = argToLet [e1;e2] in
+          let r1 = List.hd tab in
+          let r2 = List.hd (List.tl tab) in
+          eval' fdefs (cps (AND(r1,r2))) env state
+
+        else
+          let (fd1,ma1) = eval' fdefs e1 env state in
+
+          if isVal ma1
+          then
+            if val_to_bool ma1
+            then
+              let (fd2,ma2) = eval' fdefs e2 env fd1 in
+              if isVal ma2
+              then
+                if val_to_bool ma2
+                then (fd2,Const (BVal true))
+                else (fd2,Const (BVal false))
+              else (fd2,ma2)
+            else (fd1,Const (BVal false))
+          else
+            let (fd2,ma2) = eval' fdefs e2 env fd1 in
+            if isVal ma2
+            then
+              if val_to_bool ma2
+              then (fd2,ma1)
+              else (fd2,Const (BVal false))
+            else (fd2,AND(ma1,ma2))
 
       | Prim(o,es) ->
         if allToLet es
@@ -111,18 +142,19 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
           eval' fdefs (cps (Prim(o,tab))) env state
         else
           let (fd,ma) = List.fold_left
-              (fun acc e ->
+              (fun acc element ->
                  let (acc_fd,acc_ma) = acc in
-                 let (fd,ma) = eval' fdefs e env acc_fd in
+                 let (fd,ma) = eval' fdefs element env acc_fd in
                  (fd,acc_ma@[ma]) ) (state,[]) es
           in
-          if allIsValAndVar ma
+          if allIsVal ma
           then (fd,prim o ma)
           else (fd,Prim(o,ma))
 
       | If(e0,e1,e2) ->
         let (fd0,ma0) = eval' fdefs e0 env state in
-        (match ma0 with
+        begin
+        match ma0 with
          | Const _ ->
            if val_to_bool ma0
            then eval' fdefs e1 env fd0
@@ -137,14 +169,15 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
          | _ ->
            let (fd1,ma1) = eval' fdefs e1 env fd0 in
            let (fd2,ma2) = eval' fdefs e2 env fd1 in
-           if ma1 = ma2
-           then (fd2,ma1)
-           else
-             begin
-               if ((ma1 = (Const(BVal true))) && (ma2 = (Const(BVal false))))
-               then (fd2,ma0)
-               else (fd2,If(ma0,ma1,ma2))
-             end)
+           begin
+           match ma1,ma2 with
+             | x,y when x=y -> (fd2,ma1)
+             | Const(BVal true), Const(BVal false) -> (fd2,ma0)
+             | x, Const(BVal false) -> (fd2,AND(ma0,x))
+             | Const(BVal true), x -> (fd2,OR(ma0,x))
+             | _ -> (fd2,If(ma0,ma1,ma2))
+           end
+          end
 
       | Apply(s,es) ->
         let (ss,body) =
@@ -180,7 +213,6 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
         (* if Env.is_empty das
         then eval' fdefs body sas state
         else newApply s sas das state fdefs body *)
-
 
       | Exists(e1,e2) ->
 
@@ -282,7 +314,7 @@ and argToLet es =
        if toLet e
        then
          let l1 = Var (new_label ()) in
-         ((fun i -> Let(l1,e,acc_f i)),l1::acc_t@[l1])
+         ((fun i -> Let(l1,e,acc_f i)),acc_t@[l1])
        else (acc_f,acc_t@[e])
 
     ) ((fun i -> i),[]) es
@@ -367,13 +399,13 @@ and newApply s sas das state fdefs body : SourceAst.prog =
       let (e'_fd,e'_ma) = eval' fdefs body sas n_m in
       if inLineApply e'_ma
       then
-        let new_das = Env.fold (fun s _ acc -> acc@[varString(s)] ) das [] in
+        let () =Printf.printf "%s ->" s'; Env.iter (fun k e -> Printf.printf "%s:%s; " (print_expr k) (print_expr e) ) das;Printf.printf "\n" in
+        let new_das = Env.fold (fun s _ acc -> acc@[varString s] ) das [] in
         let state = Func_Tbl.add s' (new_das,e'_ma) e'_fd in
         let param = Env.fold (fun i e acc -> acc@[e]) das [] in
         (state,Apply(s',param))
 
-      else
-        (Func_Tbl.remove s' e'_fd, symbol das e'_ma)
+      else (Func_Tbl.remove s' e'_fd, symbol das e'_ma)
 
   end
 
@@ -388,6 +420,12 @@ and symbol env : SourceAst.expr -> SourceAst.expr = function
   | Exists (e1,e2) -> Exists(symbol env e1,symbol env e2)
   | Tab(es) -> Tab(List.map(fun i -> symbol env i ) es)
   | Pair(e1,e2) -> Pair(symbol env e1,symbol env e2)
+  | Let(v,e1,e2) -> Let(symbol env v, symbol env e1,symbol env e2)
+  | Switch(e1,es,e2) -> Switch(symbol env e1,
+    List.map(fun (k,i) -> (k,symbol env i)) es ,symbol env e2)
+  | If(e1,e2,e3) -> If(symbol env e1, symbol env e2,symbol env e3)
+  | OR(e1,e2) -> OR(symbol env e1,symbol env e2)
+  | AND(e1,e2) -> AND(symbol env e1,symbol env e2)
   | x -> x
 
 and findif expr_list : (SourceAst.expr * SourceAst.Env.key) option =
@@ -501,7 +539,6 @@ and isVal : SourceAst.expr -> bool  = function
   | Tab es -> allIsVal es
   | Pair (e1,e2) -> isVal e1 && isVal e2
   | _ -> false
-
 
 and allIsValAndVar (es: SourceAst.expr list) : bool =
   List.fold_left  (fun acc -> function

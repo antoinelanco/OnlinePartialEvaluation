@@ -2,32 +2,8 @@ Definition Fonction :
  
 Main :
    If((==,(HD,ls),'a')){
-      If(If((==,(HD,ls),'b')){
-            (==,(HD,(TL,ls)),'c')
-         }Else{
-            false
-         }){
-         true
-      }Else{
-         If((==,(HD,ls),'a')){
-            If((==,(HD,ls),'b')){
-               (==,(HD,(TL,ls)),'c')
-            }Else{
-               false
-            }
-         }Else{
-            false
-         }
-      }
+      (==,(HD,(TL,ls)),'b') AND (==,(HD,(TL,(TL,ls))),'c') OR (==,(HD,ls),'a') AND (==,(HD,(TL,ls)),'b') AND (==,(HD,(TL,(TL,ls))),'c')
    }Else{
-      If((==,(HD,ls),'a')){
-         If((==,(HD,ls),'b')){
-            (==,(HD,(TL,ls)),'c')
-         }Else{
-            false
-         }
-      }Else{
-         false
-      }
+      (==,(HD,ls),'a') AND (==,(HD,(TL,ls)),'b') AND (==,(HD,(TL,(TL,ls))),'c')
    }
 

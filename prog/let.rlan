@@ -1,7 +1,9 @@
 Definition Fonction :
  
 Main :
-
-   Let _var_1 <- (*,a,a) in
-   Find(_var_1,_var_1)
+   If((==,(HD,(TL,ls)),'b')){
+      y
+   }Else{
+      x
+   }
 

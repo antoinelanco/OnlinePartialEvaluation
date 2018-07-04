@@ -1,1 +1,15 @@
-find(let z <- mul[a,a] in z,[1;2;3;4;5])
+fun f(ls){
+  if(equal[hd[ls],"b"]){
+    y
+  }else{
+    x
+  }
+}
+
+
+fun g(ls){
+  f(tl[ls])
+}
+
+
+g(ls)

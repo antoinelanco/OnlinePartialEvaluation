@@ -31,7 +31,7 @@ fun notEmpty(d){
 
 fun run(s,a,t,ls,dsc1,dsc2){
   if(exists(s,a)){
-    (true,(dsc1,dsc2))
+    (true,decald((dsc1,dsc2)))
   }else{
     if(exists(s,t)){
       iter(ls,snd[find(s,t)],t,a,dsc1,dsc2)
@@ -53,7 +53,7 @@ fun iter(ls,t,ts,a,dsc1,dsc2){
                    tl[notEmpty(dsc2)])
                    in
                    if(fst[z]){
-                     (true,(fst[snd[z]],snd[snd[z]]))
+                     (true,decald((fst[snd[z]],snd[snd[z]])))
                    }else{
                      iter(ls,tl[t],ts,a,fst[snd[z]],snd[snd[z]])
                    });
@@ -63,7 +63,7 @@ fun iter(ls,t,ts,a,dsc1,dsc2){
           let z <- run(snd[hd[t]],a,ts,tl[ls],
                 add[dsc1,(fst[hd[t]],[])],tl[notEmpty(dsc2)]) in
           if(fst[z]){
-            (true,(fst[snd[z]],snd[snd[z]]))
+            (true,decald((fst[snd[z]],snd[snd[z]])))
           }else{
             iter(ls,tl[t],ts,a,fst[snd[z]],snd[snd[z]])
           }
@@ -80,6 +80,7 @@ fun iter(ls,t,ts,a,dsc1,dsc2){
 }
 
 
+let res <-
 run(1,[(8, "A");(9, "B");(10, "C")],
 [(1,[("a", 2);("b",3);("a",4)]);(2,[("b", 5)]);(3,[("b", 6)]);(4,[("c", 7)]);(5,[("z",8)]);(6,[("z",9)]);(7,[("z",10)])]
-,ls,[],[])
+,ls,[],[]) in fst[res]
