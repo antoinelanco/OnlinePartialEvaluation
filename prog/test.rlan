@@ -1,49 +1,56 @@
 Definition Fonction :
  
 
-Fonction : decald_0(p){
-   If((==,(Length,(Fst,p)),0)){
-      p
+Fonction : f_161674681(n){
+   If((==,n,1)){
+      n
    }Else{
-      ((REV,(TL,(REV,(Fst,p)))),(+,(HD,(REV,(Fst,p))),(Snd,p)))
+      (+,f_161674681((-,n,1)),1)
    }
 }
 
 
-Fonction : iter_223357749(ls){
-   If((==,(HD,ls),'b')){
-      (true,(Tab[],Tab[('a',Tab());('b',Tab())]))
+Fonction : f_2937629(n){
+   If((==,n,1)){
+      n
    }Else{
-      (false,(Tab[],Tab[('a',Tab());('_',Tab('b'))]))
+      (+,f_2937629((-,n,1)),2)
    }
 }
 
 
-Fonction : iter_585579419(ls){
-   If((==,(HD,ls),'a')){
-
-      Let z <- iter_223357749((TL,ls)) in
-      If((Fst,z)){
-            (true,decald_0(((Fst,(Snd,z)),(Snd,(Snd,z)))))
-         }Else{
-            (false,decald_0(((Fst,(Snd,z)),notEmpty_0((Snd,(Snd,z))))))
-         }
+Fonction : f_615695959(n){
+   If((==,n,1)){
+      n
    }Else{
-      (false,(Tab[],Tab[('_',Tab('a'))]))
+      (+,f_615695959((-,n,1)),3)
    }
 }
 
 
-Fonction : notEmpty_0(d){
-   If((==,(Length,d),0)){
-      Tab[('_',Tab())]
+Fonction : f_62198706(n){
+   If((==,n,1)){
+      n
    }Else{
-      d
+      (+,f_62198706((-,n,1)),4)
+   }
+}
+
+
+Fonction : f_889625290(n){
+   If((==,n,1)){
+      n
+   }Else{
+      (+,f_889625290((-,n,1)),5)
    }
 }
 
 Main :
-
-   Let res <- iter_585579419(ls) in
-   (Fst,res)
+   Switch(x):
+      Case(1) -> f_161674681(n)
+      Case(2) -> f_2937629(n)
+      Case(3) -> f_615695959(n)
+      Case(4) -> f_62198706(n)
+      Case(5) -> f_889625290(n)
+      Default -> Exception
 

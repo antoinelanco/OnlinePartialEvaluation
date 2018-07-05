@@ -1,27 +1,12 @@
 Definition Fonction :
  
-
-Fonction : run_213859364(last,ls,rls,token){
-   Switch((HD,ls)):
-      Case('b') -> run_22378273((TL,ls);ls;token)
-      Default -> 'B'
-}
-
-
-Fonction : run_22378273(ls,rls,token){
-   Switch((HD,ls)):
-      Case('b') -> run_22378273((TL,ls);ls;token)
-      Default -> 'B'
-}
-
-
-Fonction : run_922624515(last,ls,rls,token){
+Main :
    Switch((HD,ls)):
       Case('a') -> 'A'
-      Case('b') -> run_213859364(last;(TL,ls);rls;token)
-      Default -> Exception
-}
-
-Main :
-   run_922624515(last;ls;rls;token)
+      Case('b') -> Switch((HD,(TL,ls))):
+         Case('b') -> Switch((HD,(TL,(TL,ls)))):
+            Case('b') -> run_22378273((TL,(TL,(TL,ls))),(TL,(TL,ls)),token)
+            Default -> false
+         Default -> false
+      Default -> false
 

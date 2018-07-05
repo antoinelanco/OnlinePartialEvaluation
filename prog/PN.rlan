@@ -1,13 +1,9 @@
 Definition Fonction :
  
 Main :
-   If((==,(HD,ls),'a')){
-      If((==,(HD,(TL,ls)),'b')){
-         (==,(HD,(TL,(TL,ls))),'z')
-      }Else{
-         (==,(HD,(TL,ls)),'c') AND (==,(HD,(TL,(TL,ls))),'z')
-      }
+   (==,(HD,ls),'a') AND (==,(HD,(TL,ls)),'b') AND If((==,(HD,(TL,(TL,ls))),'d')){
+      (==,(HD,(TL,(TL,(TL,ls)))),'z')
    }Else{
-      (==,(HD,ls),'b') AND (==,(HD,(TL,ls)),'b') AND (==,(HD,(TL,(TL,ls))),'z')
+      (==,(HD,(TL,(TL,ls))),'e') OR (==,(HD,(TL,(TL,ls))),'c')
    }
 

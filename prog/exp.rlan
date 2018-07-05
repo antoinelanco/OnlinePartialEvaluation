@@ -11,7 +11,9 @@ Main :
                      Let y <- 
                         Let y <- 
                            Let y <- 
-                              Let y <- (*,x,x) in
+                              Let y <- 
+                                 Let y <- (*,x,1) in
+                                 (*,y,y) in
                               (*,y,y) in
                            (*,y,y) in
                         (*,y,y) in
