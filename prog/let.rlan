@@ -1,9 +1,5 @@
 Definition Fonction :
  
 Main :
-   If((==,(HD,(TL,ls)),'b')){
-      y
-   }Else{
-      x
-   }
+   ls
 

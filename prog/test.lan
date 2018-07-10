@@ -1,7 +1,102 @@
-fun f(x,n){
-  if(equal[n,1]){n}else{
-    add[f(x,sub[n,1]),x]
+fun staticmatch(p,s){
+  if(equal[fst[s],"_"]){
+    if(exists(p,snd[s])){0}else{2}
+  }else{
+    if(equal[fst[s], p]){1}else{0}
   }
 }
 
-f(find(x,[1;2;3;4;5]),n)
+fun addneg(c,a){
+  (fst[a], add[snd[a], c])
+}
+
+fun decalg(p){
+  (add[fst[p],hd[snd[p]]],tl[snd[p]])
+}
+
+fun decald(p){
+  if(equal[length[fst[p]],0]){
+    p
+  }else{
+    (rev[tl[rev[fst[p]]]],add[hd[rev[fst[p]]],snd[p]])
+  }
+
+}
+
+fun notEmpty(d){
+  if(equal[length[d],0]){
+    [("_",[])]
+  }else{d}
+}
+
+fun run(s,a,t,ls,dsc1,dsc2){
+  if(not[equal[length[ls],0]]){
+    if(exists(s,t)){
+      iter(ls,snd[find(s,t)],t,a,dsc1,dsc2)
+    }else{
+      (false,decald((dsc1,dsc2)))
+    }
+  }else{
+    if(exists(s,a)){
+      (true,decald((dsc1,dsc2)))
+    }else{
+      (false,decald((dsc1,dsc2)))
+    }
+  }
+}
+
+fun iter(ls,t,ts,a,dsc1,dsc2){
+  #if(or[equal[length[t],0],equal[length[ls],0]]){
+  if(equal[length[t],0]){
+    (false,decald((dsc1,notEmpty(dsc2))))
+  }else{
+    switch(staticmatch(fst[hd[t]],hd[notEmpty(dsc2)]))[
+      (0,iter(ls,tl[t],ts,a,dsc1,notEmpty(dsc2)));
+      (1,let z <- run(snd[hd[t]],a,ts,tl[ls],
+                  add[dsc1,hd[notEmpty(dsc2)]],
+                   tl[notEmpty(dsc2)])
+                   in
+                   if(fst[z]){
+                     (true,decald((fst[snd[z]],snd[snd[z]])))
+                   }else{
+                     iter(ls,tl[t],ts,a,fst[snd[z]],snd[snd[z]])
+                   });
+      (2,
+        if(equal[hd[ls],fst[hd[t]]]){
+
+          let z <- run(snd[hd[t]],a,ts,tl[ls],
+                add[dsc1,(fst[hd[t]],[])],tl[notEmpty(dsc2)]) in
+          if(fst[z]){
+            (true,decald((fst[snd[z]],snd[snd[z]])))
+          }else{
+            iter(ls,tl[t],ts,a,fst[snd[z]],snd[snd[z]])
+          }
+
+        }else{
+          iter(ls,tl[t],ts,a,dsc1,add[addneg(fst[hd[t]],hd[notEmpty(dsc2)]),
+          tl[notEmpty(dsc2)]])
+        }
+
+      )
+    ]
+    (exception)
+  }
+}
+
+let tab <- [(1,[("a", 2);("b",3);("a",4)]);(2,[("b", 5)]);(3,[("b", 6)]);(4,[("c", 7)]);(5,[("z",8)]);(6,[("z",9)]);(7,[("z",10)])] in
+let fin <- [(8, "A");(9, "B");(10, "C")] in
+
+#let tab <- [(1,[("a",2);("b",3)]);(3,[("b",3)])] in
+#let fin <- [(2,"A");(3,"B")] in
+
+#let tab <- [(1,[("a",2);("b",3)]);(3,[("b",3);("c",4)])] in
+#let fin <- [(2,"A");(4,"B")] in
+
+#let tab <- [(1,[("a", 2);("a",3)]);(2,[("b", 3)]);(3,[("c", 4);("c",5)]);(4,[("d", 5)])] in
+#let fin <- [(5,"A")] in
+
+#let tab <- [(1,[("a", 2);("a",3)]);(2,[("b", 4)]);(3,[("b", 5)]);(4,[("d", 6);("e",7)]);(5,[("c",8)]);(6,[("z",9)])] in
+#let fin <- [(9, "A");(7, "B");(8, "C")] in
+
+let res <- run(1,fin,tab,ls,[],[])
+in fst[res]

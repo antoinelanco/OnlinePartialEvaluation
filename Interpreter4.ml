@@ -40,29 +40,31 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
 
     | Pair(e1,e2) ->
 
-      if toLet e1 || toLet e2
+      let (fd1,ma1) = eval' fdefs e1 env state in
+      let (fd2,ma2) = eval' fdefs e2 env fd1 in
+
+      if toLet ma1 || toLet ma2
       then
-        let (cps,tab) = argToLet [e1;e2] in
+        let (cps,tab) = argToLet [ma1;ma2] in
         let r1 = List.hd tab in
         let r2 = List.hd (List.tl tab) in
-        eval' fdefs (cps (Pair(r1,r2))) env state
+        eval' fdefs (cps (Pair(r1,r2))) env fd2
 
       else
-        let (fd1,ma1) = eval' fdefs e1 env state in
-        let (fd2,ma2) = eval' fdefs e2 env fd1 in
         (fd2,Pair(ma1,ma2))
 
     | Tab(es) ->
-      if allToLet es
+
+      let (fd,ma) = List.fold_left
+          (fun (acc_fd,acc_ma) element ->
+             let (fd,ma) = eval' fdefs element env acc_fd in
+             (fd,acc_ma@[ma]) ) (state,[]) es
+      in
+      if allToLet ma
       then
-        let (cps,tab) = argToLet es in
-        eval' fdefs (cps (Tab tab)) env state
+        let (cps,tab) = argToLet ma in
+        eval' fdefs (cps (Tab tab)) env fd
       else
-        let (fd,ma) = List.fold_left
-            (fun (acc_fd,acc_ma) element ->
-               let (fd,ma) = eval' fdefs element env acc_fd in
-               (fd,acc_ma@[ma]) ) (state,[]) es
-        in
         (fd,Tab(ma))
 
     | OR(e1,e2) ->
@@ -129,20 +131,22 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
           else (fd2,AND(ma1,ma2))
 
     | Prim(o,es) ->
-      if allToLet es
+      let (fd,ma) = List.fold_left
+          (fun acc element ->
+             let (acc_fd,acc_ma) = acc in
+             let (fd,ma) = eval' fdefs element env acc_fd in
+             (fd,acc_ma@[ma]) ) (state,[]) es
+      in
+      if allToLet ma
       then
-        let (cps,tab) = argToLet es in
-        eval' fdefs (cps (Prim(o,tab))) env state
+        let (cps,tab) = argToLet ma in
+        eval' fdefs (cps (Prim(o,tab))) env fd
       else
-        let (fd,ma) = List.fold_left
-            (fun acc element ->
-               let (acc_fd,acc_ma) = acc in
-               let (fd,ma) = eval' fdefs element env acc_fd in
-               (fd,acc_ma@[ma]) ) (state,[]) es
-        in
-        if allIsVal ma
-        then (fd,prim o ma)
-        else (fd,Prim(o,ma))
+
+        (* if allIsVal ma
+        then  *)
+        (fd,prim o ma)
+        (* else (fd,Prim(o,ma)) *)
 
     | If(e0,e1,e2) ->
       let (fd0,ma0) = eval' fdefs e0 env state in
@@ -159,15 +163,20 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
           eval' fdefs (Switch(r1,new_rs,new_r2)) env fd0
 
         | _ ->
-          let (fd1,ma1) = eval' fdefs e1 env fd0 in
-          let (fd2,ma2) = eval' fdefs e2 env fd1 in
+
+        let (fd1,ma1) = eval' fdefs e1 (Env.add ma0 (Const(BVal true)) env) fd0 in
+        let (fd2,ma2) = eval' fdefs e2 (Env.add ma0 (Const(BVal false)) env) fd1 in
           begin
             match ma1,ma2 with
             | x,y when x=y -> (fd2,ma1)
             | Const(BVal true), Const(BVal false) -> (fd2,ma0)
+            | Const(BVal false), Const(BVal true) -> eval' fdefs (Prim(Not,[ma0])) env fd2
+            | x, Const(BVal true) -> eval' fdefs (OR(Prim(Not,[ma0]),x)) env fd2
             | x, Const(BVal false) -> (fd2,AND(ma0,x))
             | Const(BVal true), x -> (fd2,OR(ma0,x))
-            | _ -> (fd2,If(ma0,ma1,ma2))
+            | Const(BVal false), x -> eval' fdefs (AND(Prim(Not,[ma0]),x)) env fd2
+            | _ ->
+              (fd2,If(ma0,ma1,ma2))
           end
       end
 
@@ -178,17 +187,20 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
           | Some n -> n
           | None -> failwith ("La fonction "^s^" n'existe pas !")
         end in
-      if allToLet es
+
+      let (fd,ma) = List.fold_left
+          (fun (acc_fd,acc_ma) e ->
+             let (fd,ma) = eval' fdefs e env acc_fd in
+             (fd,acc_ma@[ma]) ) (state,[]) es
+      in
+
+      if allToLet ma
       then
-        let (cps,tab) = argToLet es in
-        eval' fdefs (cps (Apply(s,tab))) env state
+        let (cps,tab) = argToLet ma in
+        eval' fdefs (cps (Apply(s,tab))) env fd
       else
 
-        let (fd,ma) = List.fold_left
-            (fun (acc_fd,acc_ma) e ->
-               let (fd,ma) = eval' fdefs e env acc_fd in
-               (fd,acc_ma@[ma]) ) (state,[]) es
-        in
+
 
         let z = List.fold_left2
             (fun acc str ee -> Env.add (Var str) ee acc)
@@ -215,16 +227,17 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
 
     | Exists(e1,e2) ->
 
-      if toLet e1 || toLet e2
+      let (fd1,ma1) = eval' fdefs e1 env state in
+      let (fd2,ma2) = eval' fdefs e2 env fd1 in
+
+      if toLet ma1 || toLet ma2
       then
-        let (cps,tab) = argToLet [e1;e2] in
+        let (cps,tab) = argToLet [ma1;ma2] in
         let r1 = List.hd tab in
         let r2 = List.hd (List.tl tab) in
-        eval' fdefs (cps (Exists(r1,r2))) env state
+        eval' fdefs (cps (Exists(r1,r2))) env fd2
 
       else
-        let (fd1,ma1) = eval' fdefs e1 env state in
-        let (fd2,ma2) = eval' fdefs e2 env fd1 in
         begin
           match isVal ma1, ma2 with
           | true,Tab j when allIsVal j ->
@@ -241,16 +254,17 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
 
     | Find(e1,e2) ->
 
-      if toLet e1 || toLet e2
+    let (fd1,ma1) = eval' fdefs e1 env state in
+    let (fd2,ma2) = eval' fdefs e2 env fd1 in
+
+    if toLet ma1 || toLet ma2
       then
-        let (cps,tab) = argToLet [e1;e2] in
+        let (cps,tab) = argToLet [ma1;ma2] in
         let r1 = List.hd tab in
         let r2 = List.hd (List.tl tab) in
-        eval' fdefs (cps (Find(r1,r2))) env state
+        eval' fdefs (cps (Find(r1,r2))) env fd2
 
       else
-        let (fd1,ma1) = eval' fdefs e1 env state in
-        let (fd2,ma2) = eval' fdefs e2 env fd1 in
         begin
           match isVal ma1, ma2 with
           | true,Tab j when allIsVal j ->
@@ -390,9 +404,13 @@ and prim o rs : SourceAst.expr =
       | Snd,Pair(_,e2)       -> e2
       | IsPair,Pair(_,_)     -> Const(BVal true)
       | IsPair,_             -> Const(BVal false)
-      | op,Var e1-> Prim(op,[Var e1])
-      | e1,e2 -> failwith (Printf.sprintf "Err0r match bin0p %s,%s"
-                             (print_op e1) (print_expr e2))
+      | Not,Const(BVal true) -> Const(BVal false)
+      | Not,Const(BVal false) -> Const(BVal true)
+      | Not,Prim(Not,[e])     -> e
+      (* | op,Var e1-> Prim(op,[Var e1]) *)
+      | op,e1 -> Prim(op,[e1])
+      (* | op,e1 -> failwith (Printf.sprintf "Err0r match bin0p %s,%s"
+                             (print_op op) (print_expr e1)) *)
     end
   | 2 ->
     let el1 = List.hd rs in
@@ -424,10 +442,11 @@ and prim o rs : SourceAst.expr =
       | Eq,Const(BVal true),Var e -> Var e
       | Eq,Tab(e1),Tab(e2)                   -> Const(BVal (e1 = e2))
       | Eq,Const(CVal(e1)),Const(CVal(e2))   -> Const(BVal (e1 = e2))
-      | op,Var e1,e2 -> Prim(op,[Var e1;e2])
-      | op,e1,Var e2 -> Prim(op,[e1;Var e2])
-      | e1,e2,e3 -> failwith (Printf.sprintf "Err0r match bin0p %s,%s,%s"
-                                (print_op e1) (print_expr e2) (print_expr e3))
+      (* | op,Var e1,e2 -> Prim(op,[Var e1;e2])
+      | op,e1,Var e2 -> Prim(op,[e1;Var e2]) *)
+      | op,e1,e2 -> Prim(op,[e1;e2])
+      (* | op,e2,e3 -> failwith (Printf.sprintf "Err0r match bin0p %s,%s,%s"
+                                (print_op op) (print_expr e2) (print_expr e3)) *)
     end
   | _ -> failwith "Bin0p 0nly 1 or 2 arg"
 

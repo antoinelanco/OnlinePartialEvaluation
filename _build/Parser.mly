@@ -18,7 +18,7 @@
 %token EXISTS FIND
 %token EXCEP
 %token SWITCH
-%token OR AND
+%token OR AND NOT
 %token FUN
 %token LET AFF IN
 %token EOF
@@ -87,3 +87,4 @@ op:
 | SND    { Snd }
 | LENGTH { Length }
 | ISPAIR { IsPair }
+| NOT    { Not }

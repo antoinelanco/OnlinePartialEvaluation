@@ -1,9 +1,5 @@
 Definition Fonction :
  
 Main :
-   (==,(HD,ls),'a') AND (==,(HD,(TL,ls)),'b') AND If((==,(HD,(TL,(TL,ls))),'d')){
-      (==,(HD,(TL,(TL,(TL,ls)))),'z')
-   }Else{
-      (==,(HD,(TL,(TL,ls))),'e') OR (==,(HD,(TL,(TL,ls))),'c')
-   }
+   (==,(HD,ls),'a') OR (==,(HD,ls),'b')
 

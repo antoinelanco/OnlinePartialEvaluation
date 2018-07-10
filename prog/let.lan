@@ -1,15 +1,6 @@
 fun f(ls){
-  if(equal[hd[ls],"b"]){
-    y
-  }else{
-    x
-  }
+not[not[ls]]
 }
 
 
-fun g(ls){
-  f(tl[ls])
-}
-
-
-g(ls)
+f(ls)

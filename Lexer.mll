@@ -34,6 +34,7 @@
         "fun",      FUN;
         "let",      LET;
         "in",       IN;
+        "not",      NOT;
       ] ;
     fun s ->
       try  Hashtbl.find h s

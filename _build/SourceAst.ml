@@ -43,6 +43,7 @@ and op =
   | Fst
   | Snd
   | IsPair
+  | Not
 
 module Env = Map.Make(struct type t = expr let compare = compare end)
 type env = expr Env.t
@@ -63,13 +64,13 @@ and print_exprv2 space now = function
   | Exception     -> sprintf "%sException" now
   | Const(v)      -> sprintf "%s%s" now (print_val v)
   | Var(s)        -> sprintf "%s%s" now s
-  | Prim(o,es)    -> sprintf "%s(%s)" now (List.fold_left(fun ac i -> sprintf "%s,%s" ac (print_exprv2 space "" i)) (print_op o) es)
+  | Prim(o,es)    -> sprintf "%s%s" now (print_prim space es o)
   | Apply(s,es)   -> sprintf "%s%s(%s)" now s (String.concat "," (List.map print_expr es))
   | Find(e1,e2)   -> sprintf "%sFind(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
   | Exists(e1,e2) -> sprintf "%sExists(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
   | Pair(e1,e2)   -> sprintf "%s(%s,%s)" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
-  | OR(e1,e2)     -> sprintf "%s%s OR %s" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
-  | AND(e1,e2)    -> sprintf "%s%s AND %s" now (print_exprv2 space "" e1) (print_exprv2 space "" e2)
+  | OR(e1,e2)     -> sprintf "%s%s OR \n%s%s" now (print_exprv2 space "" e1) space (print_exprv2 space "" e2)
+  | AND(e1,e2)    -> sprintf "%s%s AND \n%s%s" now (print_exprv2 space "" e1) space (print_exprv2 space "" e2)
   | Tab(es)       -> sprintf "%sTab[%s]" now (String.concat ";" (List.map print_expr es))
   | Let(v,e1,e2)  -> sprintf "\n%sLet %s <- %s in\n%s%s" space (print_expr v)
                        (print_exprv2 (space^"   ") "" e1) space (print_exprv2 (space^"   ") "" e2)
@@ -97,7 +98,7 @@ and print_expr = function
   | Exception      -> sprintf "Exception"
   | Const(v)      -> sprintf "%s" (print_val v)
   | Var(s)        -> s
-  | Prim(o,es)    -> sprintf "(%s)" (List.fold_left(fun ac i -> sprintf "%s,%s" ac (print_expr i)) (print_op o) es)
+  | Prim(o,es)    -> print_prim "" es o
   | If(e0,e1,e2)  -> sprintf "If(%s)\n(%s)\n(%s)" (print_expr e0) (print_expr e1) (print_expr e2)
   | Apply(s,es)   -> sprintf "%s(%s)" s (String.concat "," (List.map print_expr es))
   | Exists(e1,e2) -> sprintf "Exists(%s,%s)" (print_expr e1) (print_expr e2)
@@ -116,19 +117,25 @@ and print_val = function
   | BVal b       -> sprintf "%b" b
   | CVal c       -> sprintf "'%s'" c
 
-and print_op = function
-  | Add -> "+"
-  | Mult -> "*"
-  | Div  -> "/"
-  | Sub -> "-"
-  | Eq -> "=="
-  | TL -> "TL"
-  | HD -> "HD"
-  | REV -> "REV"
-  | Fst -> "Fst"
-  | Snd -> "Snd"
-  | Length -> "Length"
-  | IsPair -> "IsPair"
+and print_prim space es op =
+
+  let new_es = (List.map (print_exprv2 space "") es) in
+  match op with
+  | Add -> print_binop "+" new_es
+  | Mult -> print_binop "*" new_es
+  | Div  -> print_binop "/" new_es
+  | Sub -> print_binop "-" new_es
+  | Eq -> print_binop "==" new_es
+  | TL -> sprintf "TL(%s)" (List.hd new_es)
+  | HD -> sprintf "HD(%s)" (List.hd new_es)
+  | REV -> sprintf "REV(%s)" (List.hd new_es)
+  | Fst -> sprintf "Fst(%s)" (List.hd new_es)
+  | Snd -> sprintf "Snd(%s)" (List.hd new_es)
+  | Length -> sprintf "Length(%s)" (List.hd new_es)
+  | IsPair -> sprintf "IsPair(%s)" (List.hd new_es)
+  | Not -> sprintf "Not(%s)" (List.hd new_es)
+
+and print_binop op es = sprintf "%s %s %s" (List.hd es) op (List.hd (List.tl es))
 
 and merge_vars k v1 v2 =
   match v1, v2 with

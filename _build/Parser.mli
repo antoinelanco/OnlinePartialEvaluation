@@ -10,6 +10,7 @@ type token =
   | SEMI
   | REV
   | OR
+  | NOT
   | MULT
   | LITINT of (int)
   | LET
