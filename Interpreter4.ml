@@ -201,6 +201,7 @@ and eval' fdefs main env state : SourceAst.prog = (*Eval*)
       else
 
 
+        (* let () = Printf.printf "%s : %s -> %s\n" s (String.concat ";" (List.map print_expr es)) (String.concat ";" ss) in *)
 
         let z = List.fold_left2
             (fun acc str ee -> Env.add (Var str) ee acc)
@@ -321,7 +322,9 @@ and env_string env : string = (*Static parameter to Hash*)
   let a = Env.fold(fun i e acc ->
       Printf.sprintf "%s_%s:%s" acc (print_expr i) (print_expr e))
       env "" in
-  Printf.sprintf "_%s" (string_of_int (Hashtbl.hash a))
+      let res = Hashtbl.hash a in
+      if res = 0 then "" else
+      Printf.sprintf "_%d" res
 
 and argToLet es =
   List.fold_left
@@ -336,25 +339,35 @@ and argToLet es =
 
 and newApply s sas das state fdefs body : SourceAst.prog =
   let s' = s^(env_string sas) in
-  begin
-    match (Func_Tbl.find_opt s' state) with
-    | Some _ ->
+
+  if Func_Tbl.exists (fun k _ -> k = s') state
+  then
+    let param = Env.fold (fun i e acc -> acc@[e]) das [] in
+    (state,Apply(s',param))
+
+  else
+    let n_m = Func_Tbl.add s' ([],Const(IVal(0))) state in
+    let (e'_fd,e'_ma) = eval' fdefs body sas n_m in
+    let new_das = Env.fold (fun s _ acc -> acc@[varString s] ) das [] in
+    let state = Func_Tbl.add s' (new_das,e'_ma) e'_fd in
+    if existsApply s' e'_ma
+    (* if inLineApply e'_ma *)
+    then
       let param = Env.fold (fun i e acc -> acc@[e]) das [] in
       (state,Apply(s',param))
 
-    | None ->
-      let n_m = Func_Tbl.add s' ([],Const(IVal(0))) state in
-      let (e'_fd,e'_ma) = eval' fdefs body sas n_m in
-      if inLineApply e'_ma
-      then
-        let new_das = Env.fold (fun s _ acc -> acc@[varString s] ) das [] in
-        let state = Func_Tbl.add s' (new_das,e'_ma) e'_fd in
-        let param = Env.fold (fun i e acc -> acc@[e]) das [] in
-        (state,Apply(s',param))
+    else (state, symbol das e'_ma)
 
-      else (Func_Tbl.remove s' e'_fd, symbol das e'_ma)
 
-  end
+and existsApply s = function
+  | Apply(ss,es) -> ss = s || List.exists (existsApply s) es
+  | Const _ | Var _ | Exception -> false
+  | Prim(_,es) | Tab es -> List.exists (existsApply s) es
+  | If (e1,e2,e3)   -> List.exists (existsApply s) [e1;e2;e3]
+  | Find (e1,e2) | Exists (e1,e2) | Pair(e1,e2) | AND(e1,e2) | OR(e1,e2)
+  | Let(_,e1,e2) -> List.exists (existsApply s) [e1;e2]
+  | Switch(e1,es,e2)  -> List.exists (existsApply s) [e1;e2] ||
+                         List.exists (fun (_,i) -> existsApply s i) es
 
 and symbol env : SourceAst.expr -> SourceAst.expr = function
   | Var n -> (match Env.find_opt (Var n) env with
@@ -376,6 +389,7 @@ and symbol env : SourceAst.expr -> SourceAst.expr = function
   | x -> x
 
 and inLineApply : SourceAst.expr -> bool = function
+
   | Apply(_,es) -> true
   | Switch(e1,es,e2) -> inLineApply e1 || inLineApply e2
   | If(e1,e2,e3) -> inLineApply e1 || inLineApply e2 || inLineApply e3
@@ -512,88 +526,3 @@ and gFirst : SourceAst.expr -> SourceAst.expr = function
 and varString : SourceAst.expr -> string = function
   | Var n -> n
   | _ -> failwith "Is N0T a Var"
-
-
-(* and findif expr_list : (SourceAst.expr * SourceAst.Env.key) option =
-  Env.fold (fun k i acc ->
-      if (existsif i)
-      then Some (i,k)
-      else acc)
-    expr_list None *)
-
-(* and existsif : SourceAst.expr -> bool = function
-  | Switch _ | If _ -> true
-  | Prim(_,es) -> List.exists(fun i -> existsif i ) es
-  | Let(_,e1,e2) -> existsif e1 || existsif e2
-  | _ -> false *)
-
-(* and ifExpEnv (env : SourceAst.env) : bool =
-  Env.exists (fun _ a -> ifExpProf a) env *)
-
-
-(* and ifdas s sas das state fdefs body : SourceAst.prog =
-
-  if Env.is_empty das
-  then eval' fdefs body sas state
-  else
-    begin
-      match findif das with
-      | Some (elemfind,k) -> applyTransfo elemfind k s sas das state fdefs body
-      | None -> newApply s sas das state fdefs body
-    end *)
-
-(* and applyTransfo elemfind k s sas das rs_fd fdefs body : SourceAst.prog =
-
-  match elemfind with
-  | If (e1,e2,e3) ->
-
-    let (a1,b1) = eval' fdefs e2 sas rs_fd in
-    let (a2,b2) = eval' fdefs e3 sas rs_fd in
-
-
-    let new_das = Env.remove k das in
-    let (new_sas1,new_das1) =
-      if isVal b1
-      then (Env.add k b1 sas,new_das)
-      else (sas,Env.add k b1 new_das) in
-    let (new_sas2,new_das2) =
-      if isVal b2
-      then (Env.add k b2 sas,new_das)
-      else (sas,Env.add k b2 new_das) in
-
-    let (a,b) = ifdas s new_sas1 new_das1 a1 fdefs body in
-    let (c,d) = ifdas s new_sas2 new_das2 a2 fdefs body in
-
-    eval' fdefs (If(e1,b,d)) sas (Func_Tbl.merge merge_vars a c)
-
-
-  | Switch(e1,es,e2) ->
-    let new_das = Env.remove k das in
-
-    let (new_env,new_es) = List.fold_left (fun (e,acc) (v1,ee) ->
-
-        let (a1,b1) = eval' fdefs ee sas e in
-        let (new_sas1,new_das1) =
-          if isVal b1
-          then (Env.add k b1 sas,new_das)
-          else (sas,Env.add k b1 new_das) in
-        let (a,b) = ifdas s new_sas1 new_das1 a1 fdefs body in
-        if ifExpEnv new_das1
-        then (e,acc@[(v1,Exception)])
-        else (a,acc@[(v1,b)])
-
-      )
-        (rs_fd,[]) es in
-
-    let (a1,b1) = eval' fdefs e2 sas new_env in
-    let (new_sas1,new_das1) =
-      if isVal b1
-      then (Env.add k b1 sas,new_das)
-      else (sas,Env.add k b1 new_das)
-    in
-    let (a,b) = ifdas s new_sas1 new_das1 a1 fdefs body in
-    if ifExpEnv new_das1
-    then (new_env,Switch(e1,new_es,Exception))
-    else (a,Switch(e1,new_es,b))
-
-  |   _ -> failwith "forcement un if/switch" *)

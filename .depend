@@ -1,9 +1,11 @@
+CleanFunction.cmo : SourceAst.cmo
+CleanFunction.cmx : SourceAst.cmx
 Interpreter4.cmo : SourceAst.cmo
 Interpreter4.cmx : SourceAst.cmx
 Lib.cmo : SourceAst.cmo
 Lib.cmx : SourceAst.cmx
-Main.cmo : Printer.cmo Interpreter4.cmo
-Main.cmx : Printer.cmx Interpreter4.cmx
+Main.cmo : Printer.cmo Interpreter4.cmo CleanFunction.cmo
+Main.cmx : Printer.cmx Interpreter4.cmx CleanFunction.cmx
 Printer.cmo : SourceAst.cmo
 Printer.cmx : SourceAst.cmx
 SourceAst.cmo :

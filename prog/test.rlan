@@ -1,25 +1,44 @@
 Definition Fonction :
  
-Main :
-   Not(Length(ls) == 0) AND 
-   If(HD(ls) == 'a'){
-      Not(Length(TL(ls)) == 0) AND 
-      If(HD(TL(ls)) == 'b'){
-         Not(Length(TL(TL(ls))) == 0) AND 
-         HD(TL(TL(ls))) == 'z' AND 
-         Length(TL(TL(TL(ls)))) == 0
+
+Fonction : decald(p){
+   If(Length(Fst(p)) == 0){
+      p
+   }Else{
+      (REV(TL(REV(Fst(p)))),HD(REV(Fst(p))) + Snd(p))
+   }
+}
+
+
+Fonction : run_246160062(ls){
+   If(Not(Length(ls) == 0)){
+      If(HD(ls) == 'a'){
+         Let z <- run_246160062(TL(ls)) in
+         If(Fst(z)){
+               If(Length(Fst(Snd(z))) == 0){
+                  Let _var_1 <- (Fst(Snd(z)),Snd(Snd(z))) in
+                  (true,_var_1)
+               }Else{
+                  Let _var_1 <- (REV(TL(REV(Fst(Snd(z))))),HD(REV(Fst(Snd(z)))) + Snd(Snd(z))) in
+                  (true,_var_1)
+               }
+            }Else{
+               If(Length(Snd(Snd(z))) == 0){
+                  Let _var_4 <- decald((Fst(Snd(z)),Tab(('_',Tab())))) in
+                  (false,_var_4)
+               }Else{
+                  Let _var_4 <- decald((Fst(Snd(z)),Snd(Snd(z)))) in
+                  (false,_var_4)
+               }
+            }
       }Else{
-         HD(TL(ls)) == 'c' AND 
-         Not(Length(TL(TL(ls))) == 0) AND 
-         HD(TL(TL(ls))) == 'z' AND 
-         Length(TL(TL(TL(ls)))) == 0
+         (false,(Tab[],Tab[('_',Tab('a'))]))
       }
    }Else{
-      HD(ls) == 'b' AND 
-      Not(Length(TL(ls)) == 0) AND 
-      HD(TL(ls)) == 'b' AND 
-      Not(Length(TL(TL(ls))) == 0) AND 
-      HD(TL(TL(ls))) == 'z' AND 
-      Length(TL(TL(TL(ls)))) == 0
+      (true,(Tab[],Tab[]))
    }
+}
+
+Main :
+   Fst(run_246160062(ls))
 

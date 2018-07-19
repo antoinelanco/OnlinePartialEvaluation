@@ -1,6 +1,100 @@
-fun f(ls){
-not[not[ls]]
+fun staticmatch(p,s){
+  if(equal[fst[s],"_"]){
+    if(exists(p,snd[s])){0}else{2}
+  }else{
+    if(equal[fst[s], p]){1}else{0}
+  }
 }
 
+fun addneg(c,a){
+  (fst[a], add[snd[a], c])
+}
 
-f(ls)
+fun decalg(p){
+  (add[fst[p],hd[snd[p]]],tl[snd[p]])
+}
+
+fun decald(p){
+  if(equal[length[fst[p]],0]){
+    p
+  }else{
+    (rev[tl[rev[fst[p]]]],add[hd[rev[fst[p]]],snd[p]])
+  }
+
+}
+
+fun notEmpty(d){
+  if(equal[length[d],0]){
+    [("_",[])]
+  }else{d}
+}
+
+fun run(s,a,t,ls,dsc1,dsc2,dsc3){
+  if(exists(s,dsc3)){
+    let dscs <- snd[find(s,dsc3)] in
+    let dscc1 <- hd[dscs] in
+    let dscc2 <- hd[tl[dscs]] in
+    let dscc3 <- hd[tl[tl[dscs]]] in
+    run(s,a,t,ls,dscc1,dscc2,dscc3)
+  }else{
+    if(not[equal[length[ls],0]]){
+      if(exists(s,t)){
+        iter(fst[find(s,t)],ls,snd[find(s,t)],t,a,dsc1,dsc2,add[dsc3,(s,[dsc1;dsc2;dsc3])])
+      }else{
+        (false,decald((dsc1,dsc2)))
+      }
+    }else{
+      if(exists(s,a)){
+        (true,decald((dsc1,dsc2)))
+      }else{
+        (false,decald((dsc1,dsc2)))
+      }
+    }
+  }
+}
+
+fun runn(s,a,t,ls,dsc1,dsc2,dsc3){
+   iter(fst[find(s,t)],ls,snd[find(s,t)],t,a,dsc1,dsc2,add[dsc3,(s,[dsc1;dsc2;dsc3])])
+}
+
+fun iter(s,ls,t,ts,a,dsc1,dsc2,dsc3){
+  if(equal[length[t],0]){
+    (false,decald((dsc1,notEmpty(dsc2))))
+  }else{
+    switch(staticmatch(fst[hd[t]],hd[notEmpty(dsc2)]))[
+      (0,iter(s,ls,tl[t],ts,a,dsc1,notEmpty(dsc2),dsc3));
+      (1,let z <- run(snd[hd[t]],a,ts,tl[ls],
+                  add[dsc1,hd[notEmpty(dsc2)]],
+                   tl[notEmpty(dsc2)],add[dsc3,(s,[dsc1;dsc2;dsc3])])
+                   in
+                   if(fst[z]){
+                     (true,decald((fst[snd[z]],snd[snd[z]])))
+                   }else{
+                     iter(s,ls,tl[t],ts,a,fst[snd[z]],snd[snd[z]],dsc3)
+                   });
+      (2,
+        if(equal[hd[ls],fst[hd[t]]]){
+
+          let z <- run(snd[hd[t]],a,ts,tl[ls],
+                add[dsc1,(fst[hd[t]],[])],tl[notEmpty(dsc2)],add[dsc3,(s,[dsc1;dsc2;dsc3])]) in
+          if(fst[z]){
+            (true,decald((fst[snd[z]],snd[snd[z]])))
+          }else{
+            iter(s,ls,tl[t],ts,a,fst[snd[z]],snd[snd[z]],dsc3)
+          }
+
+        }else{
+          iter(s,ls,tl[t],ts,a,dsc1,add[addneg(fst[hd[t]],hd[notEmpty(dsc2)]),
+          tl[notEmpty(dsc2)]],dsc3)
+        }
+
+      )
+    ]
+    (exception)
+  }
+}
+
+let tab <- [(1,[("a",1)])] in
+let fin <- [(1,"A")] in
+
+runn(1,fin,tab,ls,[],[],[])

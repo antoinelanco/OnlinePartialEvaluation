@@ -28,6 +28,7 @@ let p =
 
 (* let p   = Lib.addLib p *)
 let r = Interpreter4.eval p
+let r = CleanFunction.cleanFunc r
 let res = Printer.print r
 
 let output_file = (Filename.chop_suffix file ".lan") ^ ".rlan"

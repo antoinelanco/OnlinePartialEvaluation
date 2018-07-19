@@ -72,7 +72,7 @@ and print_exprv2 space now = function
   | OR(e1,e2)     -> sprintf "%s%s OR \n%s%s" now (print_exprv2 space "" e1) space (print_exprv2 space "" e2)
   | AND(e1,e2)    -> sprintf "%s%s AND \n%s%s" now (print_exprv2 space "" e1) space (print_exprv2 space "" e2)
   | Tab(es)       -> sprintf "%sTab[%s]" now (String.concat ";" (List.map print_expr es))
-  | Let(v,e1,e2)  -> sprintf "\n%sLet %s <- %s in\n%s%s" space (print_expr v)
+  | Let(v,e1,e2)  -> sprintf "%sLet %s <- %s in\n%s%s" now (print_expr v)
                        (print_exprv2 (space^"   ") "" e1) space (print_exprv2 (space^"   ") "" e2)
 
   | Switch(e1,es,e2) -> sprintf "%sSwitch(%s):\n%s%sDefault -> %s"
