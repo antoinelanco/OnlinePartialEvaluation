@@ -1,0 +1,14 @@
+Definition Fonction :
+
+
+Fonction : run_963000703(ls){
+   Length(ls) == 0) OR HD(ls) == 'b' AND run_963000703(TL(ls))
+}
+
+Main :
+   Not(Length(ls) == 0) AND
+   If(HD(ls) == 'a'){
+      Length(TL(ls)) == 0)
+   }Else{
+      HD(ls) == 'b' AND run_963000703(TL(ls))
+   }

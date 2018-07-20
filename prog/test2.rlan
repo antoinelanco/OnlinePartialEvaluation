@@ -1,0 +1,9 @@
+Definition Fonction :
+
+
+Fonction : run_66313765(ls){
+   Length(ls) == 0 OR HD(ls) == 'a' AND run_66313765(TL(ls))
+}
+
+Main :
+   Fst(run_66313765(ls))
