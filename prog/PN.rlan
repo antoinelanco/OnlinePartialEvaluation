@@ -1,5 +1,75 @@
 Definition Fonction :
  
+
+Fonction : run_963000703(ls){
+   If(Not(Length(ls) == 0)){
+      If(HD(ls) == 'b'){
+         Let z <- run_963000703(TL(ls)) in
+         If(Fst(z)){
+               If(Length(Fst(Snd(z))) == 0){
+                  Let _var_1 <- (Fst(Snd(z)),Snd(Snd(z))) in
+                  (true,_var_1)
+               }Else{
+                  Let _var_1 <- (REV(TL(REV(Fst(Snd(z))))),HD(REV(Fst(Snd(z)))) + Snd(Snd(z))) in
+                  (true,_var_1)
+               }
+            }Else{
+               If(Length(Snd(Snd(z))) == 0){
+                  If(Length(Fst(Snd(z))) == 0){
+                     (false,(Fst(Snd(z)),Tab[('_',Tab())]))
+                  }Else{
+                     Let _var_4 <- (REV(TL(REV(Fst(Snd(z))))),HD(REV(Fst(Snd(z)))) + Tab[('_',Tab())]) in
+                     (false,_var_4)
+                  }
+               }Else{
+                  If(Length(Fst(Snd(z))) == 0){
+                     (false,(Fst(Snd(z)),Snd(Snd(z))))
+                  }Else{
+                     Let _var_4 <- (REV(TL(REV(Fst(Snd(z))))),HD(REV(Fst(Snd(z)))) + Snd(Snd(z))) in
+                     (false,_var_4)
+                  }
+               }
+            }
+      }Else{
+         (false,(Tab[],Tab[('b',Tab());('_',Tab('b'))]))
+      }
+   }Else{
+      (true,(Tab[],Tab[('b',Tab())]))
+   }
+}
+
 Main :
-   (==,(HD,ls),'a') OR (==,(HD,ls),'b')
+   Not(Length(ls) == 0) AND 
+   If(HD(ls) == 'a'){
+      Length(TL(ls)) == 0
+   }Else{
+      HD(ls) == 'b' AND 
+      Let res <- Let z <- run_963000703(TL(ls)) in
+         If(Fst(z)){
+               If(Length(Fst(Snd(z))) == 0){
+                  Let _var_5 <- (Fst(Snd(z)),Snd(Snd(z))) in
+                  (true,_var_5)
+               }Else{
+                  Let _var_5 <- (REV(TL(REV(Fst(Snd(z))))),HD(REV(Fst(Snd(z)))) + Snd(Snd(z))) in
+                  (true,_var_5)
+               }
+            }Else{
+               If(Length(Snd(Snd(z))) == 0){
+                  If(Length(Fst(Snd(z))) == 0){
+                     (false,(Fst(Snd(z)),Tab[('_',Tab())]))
+                  }Else{
+                     Let _var_8 <- (REV(TL(REV(Fst(Snd(z))))),HD(REV(Fst(Snd(z)))) + Tab[('_',Tab())]) in
+                     (false,_var_8)
+                  }
+               }Else{
+                  If(Length(Fst(Snd(z))) == 0){
+                     (false,(Fst(Snd(z)),Snd(Snd(z))))
+                  }Else{
+                     Let _var_8 <- (REV(TL(REV(Fst(Snd(z))))),HD(REV(Fst(Snd(z)))) + Snd(Snd(z))) in
+                     (false,_var_8)
+                  }
+               }
+            } in
+      Fst(res)
+   }
 

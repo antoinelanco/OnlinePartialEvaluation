@@ -97,7 +97,7 @@ fun iter(s,ls,t,ts,a,dsc1,dsc2,dsc3){
 #let tab <- [(1,[("a",2);("b",3)]);(3,[("b",3)])] in
 #let fin <- [(2,"A");(3,"B")] in
 
-let tab <- [(1,[("a",1)]);(2,[("a",2)])] in
+let tab <- [(1,[("a",1)])] in
 let fin <- [(1,"A")] in
 
 #let tab <- [(1,[("a",2);("b",3)]);(3,[("b",3);("c",4)])] in

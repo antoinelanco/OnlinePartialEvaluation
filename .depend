@@ -12,3 +12,5 @@ SourceAst.cmo :
 SourceAst.cmx :
 StateMachine.cmo :
 StateMachine.cmx :
+Trich.cmo : SourceAst.cmo Interpreter4.cmo
+Trich.cmx : SourceAst.cmx Interpreter4.cmx

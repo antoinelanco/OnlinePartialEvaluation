@@ -1,9 +1,45 @@
 Definition Fonction :
  
-Main :
-   If((==,(HD,ls),'a')){
-      (==,(HD,(TL,ls)),'b') AND (==,(HD,(TL,(TL,ls))),'c') OR (==,(HD,ls),'a') AND (==,(HD,(TL,ls)),'b') AND (==,(HD,(TL,(TL,ls))),'c')
+
+Fonction : iter_497210630(ls){
+   false
+}
+
+
+Fonction : iter_532029024(ls){
+   If(HD(ls) == 'a'){
+      iter_923996847(TL(ls)) OR 
+      iter_497210630(ls)
    }Else{
-      (==,(HD,ls),'a') AND (==,(HD,(TL,ls)),'b') AND (==,(HD,(TL,(TL,ls))),'c')
+      iter_497210630(ls)
+   }
+}
+
+
+Fonction : iter_923996847(ls){
+   If(HD(ls) == 'b'){
+      HD(TL(ls)) == 'c' OR 
+      iter_497210630(ls)
+   }Else{
+      iter_497210630(ls)
+   }
+}
+
+Main :
+   If(HD(ls) == 'a'){
+      If(HD(TL(ls)) == 'b'){
+         HD(TL(TL(ls))) == 'c' OR 
+         iter_497210630(TL(ls))
+      }Else{
+         iter_497210630(TL(ls))
+      } OR 
+      If(HD(ls) == 'a'){
+         iter_923996847(TL(ls)) OR 
+         iter_497210630(ls)
+      }Else{
+         iter_497210630(ls)
+      }
+   }Else{
+      iter_532029024(ls)
    }
 
